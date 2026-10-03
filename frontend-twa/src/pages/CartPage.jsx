@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMenu, createOrder } from '../api/menu'
 import { useCart, cartLines, cartTotal } from '../store/cart'
 import { formatNumber } from '../lib/format'
@@ -28,6 +28,18 @@ export default function CartPage({ onBack, onSuccess }) {
   })
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
+
+  useEffect(() => {
+    if (!saved.name && tgUser?.id) {
+      import('../api/menu').then(({ supabase }) => {
+        supabase.from('customers').select('full_name, phone').eq('telegram_id', tgUser.id).single().then(({ data }) => {
+          if (data) {
+            setForm(f => ({ ...f, name: data.full_name, phone: data.phone }))
+          }
+        })
+      })
+    }
+  }, [])
 
   const lines = data ? cartLines(items, data.products) : []
   const total = cartTotal(lines)
