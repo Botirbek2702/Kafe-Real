@@ -30,21 +30,32 @@
     margin: 0;
     size: 80mm auto;
   }
-  body {
+  
+  html, body {
     background: white;
     color: black;
-    font-family: monospace;
+    height: auto !important;
+    overflow: visible !important;
     width: 80mm;
+    margin: 0;
+    padding: 0;
   }
-  .no-print {
-    display: none !important;
+
+  body * {
+    visibility: hidden;
   }
-  .print-only {
-    display: block !important;
+
+  #print-receipt, #print-receipt * {
+    visibility: visible;
   }
-  * {
-    color: black !important;
-    background: transparent !important;
+
+  #print-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    padding: 10px;
+    margin: 0;
   }
 }
 

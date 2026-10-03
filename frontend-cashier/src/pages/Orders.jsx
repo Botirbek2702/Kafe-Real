@@ -230,7 +230,7 @@ export default function Orders() {
             </div>
 
             {/* Print Only Receipt */}
-            <div className="hidden print:block p-4 text-black bg-white">
+            <div id="print-receipt" className="hidden print:block p-4 text-black bg-white">
               <div className="text-center mb-4">
                 <h1 className="text-2xl font-bold font-serif mb-1">KAFE</h1>
                 <p className="text-sm border-b pb-2 border-black">Buyurtma #{selectedOrder.id}</p>
@@ -243,7 +243,7 @@ export default function Orders() {
                 <thead>
                   <tr className="border-b border-black">
                     <th className="pb-1">Nomi</th>
-                    <th className="pb-1">Soni</th>
+                    <th className="pb-1 text-center">Soni</th>
                     <th className="text-right pb-1">Jami</th>
                   </tr>
                 </thead>
@@ -251,8 +251,8 @@ export default function Orders() {
                   {selectedOrder.order_items.map((item, idx) => (
                     <tr key={idx}>
                       <td className="py-1">{item.products?.name}</td>
-                      <td className="py-1">{item.quantity} x {Number(item.unit_price).toLocaleString()}</td>
-                      <td className="py-1 text-right">{Number(item.total_price).toLocaleString()}</td>
+                      <td className="py-1 text-center">{item.quantity} x {Number(item.price || item.unit_price).toLocaleString()}</td>
+                      <td className="py-1 text-right">{Number((item.price || item.unit_price) * item.quantity).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
