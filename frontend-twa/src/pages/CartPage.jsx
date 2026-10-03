@@ -45,6 +45,8 @@ export default function CartPage({ onBack, onSuccess }) {
   const total = cartTotal(lines)
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
+  const addByKey = useCart((s) => s.addByKey)
+
   const submit = async (e) => {
     e.preventDefault()
     setError('')
@@ -61,7 +63,12 @@ export default function CartPage({ onBack, onSuccess }) {
         p_address: form.orderType === 'delivery' ? form.address.trim() : null,
         p_comment: form.comment.trim() || null,
         p_order_type: form.orderType,
-        p_items: lines.map((l) => ({ product_id: l.product.id, quantity: l.qty, variant: l.variantName || null })),
+        p_items: lines.map((l) => ({ 
+          product_id: l.product.id, 
+          quantity: l.qty, 
+          variant: l.variantName || null,
+          addons: l.addons && l.addons.length > 0 ? l.addons : null 
+        })),
       })
       localStorage.setItem(SAVED_KEY, JSON.stringify({ name: form.name, phone: form.phone, orderType: form.orderType, address: form.address }))
       clear()
@@ -102,19 +109,22 @@ export default function CartPage({ onBack, onSuccess }) {
 
       {/* Taomlar */}
       <ul className="space-y-2.5 px-4 pt-4">
-        {lines.map(({ product, qty }) => (
-          <li key={product.id} className="flex items-center gap-3 rounded-xl border border-gold-600/15 bg-obsidian-850 p-2.5">
+        {lines.map(({ key, product, name, addons, price, qty }) => (
+          <li key={key} className="flex items-center gap-3 rounded-xl border border-gold-600/15 bg-obsidian-850 p-2.5">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg">
               <img src={product.image_url} alt="" className="h-full w-full scale-[1.35] object-cover" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-serif text-[15px] font-semibold text-white">{product.name}</p>
+              <p className="truncate font-serif text-[15px] font-semibold text-white">{name}</p>
+              {addons && addons.length > 0 && (
+                <p className="text-[10px] text-blue-400 font-light truncate mt-0.5">+{addons.join(', ')}</p>
+              )}
               <p className="mt-0.5 font-cinzel text-sm font-semibold text-gold-400">
-                {formatNumber(product.price * qty)} <span className="font-sans text-[10px] font-normal text-stone-500">UZS</span>
+                {formatNumber(price * qty)} <span className="font-sans text-[10px] font-normal text-stone-500">UZS</span>
               </p>
             </div>
             <div className="w-[104px] shrink-0">
-              <QtyControl size="sm" qty={qty} onAdd={() => add(product.id)} onRemove={() => remove(product.id)} />
+              <QtyControl size="sm" qty={qty} onAdd={() => addByKey(key)} onRemove={() => remove(key)} />
             </div>
           </li>
         ))}

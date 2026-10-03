@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 async function fetchMenu() {
   const [cats, prods] = await Promise.all([
     supabase.from('categories').select('id, name, sort_order').order('sort_order'),
-    supabase.from('products').select('id, category_id, name, description, price, image_url, is_available, variants').order('id'),
+    supabase.from('products').select('id, category_id, name, description, price, image_url, is_available, variants, addons, ready_time, promo_text').order('id'),
   ])
   if (cats.error) throw cats.error
   if (prods.error) throw prods.error
