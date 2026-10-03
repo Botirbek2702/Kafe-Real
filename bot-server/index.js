@@ -132,13 +132,17 @@ processPendingBroadcasts();
 // ==========================================
 // BUYURTMA HOLATI (STATUS) UCHUN REALTIME
 // ==========================================
-function getStatusMessage(status, orderId) {
-  switch (status) {
-    case 'accepted': return `✅ Buyurtmangiz (#${orderId}) qabul qilindi.`;
-    case 'cooking': return `🧑‍🍳 Buyurtmangiz (#${orderId}) tayyorlanmoqda.`;
-    case 'ready': return `🛍 Buyurtmangiz (#${orderId}) tayyor!`;
-    case 'delivered': return `🚀 Buyurtmangiz (#${orderId}) yetkazib berildi. Yoqimli ishtaha!`;
-    case 'cancelled': return `❌ Buyurtmangiz (#${orderId}) bekor qilindi.`;
+function getStatusMessage(order) {
+  switch (order.status) {
+    case 'accepted': return `✅ Buyurtmangiz (#${order.id}) qabul qilindi.`;
+    case 'cooking': return `👨‍🍳 Buyurtmangiz (#${order.id}) tayyorlanmoqda.`;
+    case 'ready': return `🥡 Buyurtmangiz (#${order.id}) tayyor!`;
+    case 'delivered': return `🚀 Buyurtmangiz (#${order.id}) yetkazib berildi. Yoqimli ishtaha!`;
+    case 'cancelled': 
+      if (order.cancel_reason) {
+        return `❌ Buyurtmangiz (#${order.id}) bekor qilindi.\nSabab: ${order.cancel_reason}`;
+      }
+      return `❌ Buyurtmangiz (#${order.id}) bekor qilindi.`;
     default: return null;
   }
 }
@@ -154,7 +158,7 @@ supabase
       
       // Status o'zgargandagina xabar yuboramiz
       if (newOrder.status !== oldOrder.status) {
-        const msg = getStatusMessage(newOrder.status, newOrder.id)
+        const msg = getStatusMessage(newOrder)
         if (msg) {
           bot.telegram.sendMessage(newOrder.telegram_id, msg).catch(console.error)
         }

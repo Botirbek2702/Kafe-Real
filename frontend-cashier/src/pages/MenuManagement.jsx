@@ -195,10 +195,15 @@ export default function MenuManagement() {
                               </span>
                             )}
                             {product.promo_text && (
-                              <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20">
-                                🎁 {product.promo_text}
-                              </span>
-                            )}
+                                <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20">
+                                  🎁 {product.promo_text}
+                                </span>
+                              )}
+                              {product.stock !== null && product.stock !== undefined && (
+                                <span className="text-[10px] bg-orange-500/10 text-orange-400 px-1.5 py-0.5 rounded border border-orange-500/20">
+                                  📦 Qoldiq: {product.stock} ta
+                                </span>
+                              )}
                           </div>
                         </div>
                       </div>

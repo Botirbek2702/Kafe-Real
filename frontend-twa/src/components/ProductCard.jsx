@@ -9,7 +9,7 @@ export default function ProductCard({ product }) {
   const cartItems = useCart((s) => s.items)
   const add = useCart((s) => s.add)
   const remove = useCart((s) => s.remove)
-  const soldOut = !product.is_available
+  const soldOut = !product.is_available || product.stock === 0
 
   // Sum total qty of this product across all variants/addons
   const totalQty = Object.entries(cartItems).reduce((sum, [key, q]) => {
@@ -72,6 +72,11 @@ export default function ProductCard({ product }) {
           {product.ready_time && (
             <span className="bg-purple-600/90 text-white px-2 py-0.5 rounded text-[10px] font-bold shadow-md">
               🕒 {product.ready_time}
+            </span>
+          )}
+          {product.stock !== null && product.stock > 0 && product.stock <= 5 && (
+            <span className="bg-orange-600/90 text-white px-2 py-0.5 rounded text-[10px] font-bold shadow-md">
+              ⚠️ Faqat {product.stock} ta qoldi
             </span>
           )}
         </div>

@@ -75,34 +75,7 @@ export default function CartPage({ onBack, onSuccess }) {
       hapticSuccess()
       onSuccess(orderId)
     } catch (err) {
-      setError(err.message?.includes('tugagan') ? 'Savatchadagi ba\'zi taomlar tugab qoldi. Savatchani tekshiring.' : 'Buyurtma yuborilmadi. Qayta urinib ko\'ring.')
-    } finally {
-      setSending(false)
-    }
-  }
-
-  if (!lines.length)
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full border border-gold-500/30 bg-obsidian-850">
-          <BagIcon className="h-9 w-9 text-gold-500" />
-        </div>
-        <p className="font-serif text-2xl text-white">Savatcha bo'sh</p>
-        <p className="text-sm text-stone-400">Menyudan sevimli taomlaringizni tanlang</p>
-        <button className="bg-gold-gradient mt-2 rounded-full px-6 py-3 font-cinzel text-xs font-bold tracking-[0.15em] text-obsidian-950 uppercase" onClick={onBack}>
-          Menyuga qaytish
-        </button>
-      </div>
-    )
-
-  return (
-    <form onSubmit={submit} className="pb-32">
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-gold-600/10 bg-obsidian-950/90 px-4 py-3 backdrop-blur-lg">
-        <button type="button" onClick={onBack} aria-label="Orqaga" className="flex h-9 w-9 items-center justify-center rounded-full border border-gold-600/30 text-gold-400">
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </button>
-        <h1 className="font-serif text-xl font-semibold text-white">Savatcha</h1>
-        <button type="button" onClick={() => { haptic(); clear() }} className="ml-auto text-xs tracking-wide text-stone-500 uppercase">
+      setError(err.message?.includes('qolgan') || err.message?.includes('tugagan') ? err.message : 'Buyurtma yuborilmadi. Qayta urinib ko\'ring.'); clear() }} className="ml-auto text-xs tracking-wide text-stone-500 uppercase">
           Tozalash
         </button>
       </header>

@@ -55,9 +55,19 @@ export default function Orders() {
   }
 
   const updateOrderStatus = async (id, status) => {
+    let cancel_reason = null;
+    if (status === 'cancelled') {
+      const reason = window.prompt("Bekor qilish sababini yozing (mijozga boradi):", "Taom qolmagan");
+      if (reason === null) return; // cancelled prompt
+      cancel_reason = reason;
+    }
+
+    const payload = { status };
+    if (cancel_reason) payload.cancel_reason = cancel_reason;
+
     const { error } = await supabase
       .from('orders')
-      .update({ status })
+      .update(payload)
       .eq('id', id)
       
     if (error) {
