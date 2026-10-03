@@ -18,5 +18,9 @@ export function initTelegram() {
   if (!tg) return
   tg.ready()
   tg.expand()
-  tg.setHeaderColor?.('bg_color')
+  // Brend ranglari: Telegram'ning tepa va pastki paneli ham qora bo'ladi
+  tg.setHeaderColor?.('#0e0e10')
+  tg.setBackgroundColor?.('#09090b')
+  tg.setBottomBarColor?.('#0e0e10')
+  tg.disableVerticalSwipes?.()
 }

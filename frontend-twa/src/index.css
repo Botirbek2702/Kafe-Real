@@ -1,18 +1,70 @@
 @import "tailwindcss";
 
-/* Telegram mavzu ranglari (Telegram o'zi --tg-theme-* o'zgaruvchilarini beradi) */
+/* Abdulaziz Kafe brend uslubi (abdulaziz-kafe.vercel.app bilan bir xil) */
 @theme {
-  --color-tg-bg: var(--tg-theme-bg-color, #ffffff);
-  --color-tg-text: var(--tg-theme-text-color, #000000);
-  --color-tg-hint: var(--tg-theme-hint-color, #999999);
-  --color-tg-button: var(--tg-theme-button-color, #2481cc);
-  --color-tg-button-text: var(--tg-theme-button-text-color, #ffffff);
-  --color-tg-secondary: var(--tg-theme-secondary-bg-color, #f1f1f1);
+  --color-obsidian-950: #09090b;
+  --color-obsidian-900: #0e0e10;
+  --color-obsidian-850: #131315;
+  --color-obsidian-800: #1b1b1d;
+
+  --color-gold-300: #f5e197;
+  --color-gold-400: #e5c365;
+  --color-gold-500: #d4af37;
+  --color-gold-600: #b89428;
+
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-cinzel: "Cinzel", serif;
 }
 
-body {
+html, body {
   margin: 0;
-  background: var(--color-tg-bg);
-  color: var(--color-tg-text);
-  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--color-obsidian-950);
+  color: #e7e5e4;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
 }
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #fff2cc 0%, #d4af37 50%, #aa820a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #f5e197 0%, #d4af37 55%, #b89428 100%);
+}
+
+.gold-border-glow {
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 0 25px -8px rgba(212, 175, 55, 0.15);
+}
+
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.7), transparent);
+}
+
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Inputlar */
+.field {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  background: var(--color-obsidian-850);
+  padding: 0.85rem 1rem;
+  color: #f5f5f4;
+  font-size: 16px; /* iOS zoom bo'lmasligi uchun */
+  outline: none;
+  transition: border-color 0.2s;
+}
+.field::placeholder { color: #78716c; }
+.field:focus { border-color: rgba(212, 175, 55, 0.6); }
+
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+.animate-pop { animation: pop 0.3s ease; }
