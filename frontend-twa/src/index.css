@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* Telegram mavzu ranglari (Telegram o'zi --tg-theme-* o'zgaruvchilarini beradi) */
+@theme {
+  --color-tg-bg: var(--tg-theme-bg-color, #ffffff);
+  --color-tg-text: var(--tg-theme-text-color, #000000);
+  --color-tg-hint: var(--tg-theme-hint-color, #999999);
+  --color-tg-button: var(--tg-theme-button-color, #2481cc);
+  --color-tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+  --color-tg-secondary: var(--tg-theme-secondary-bg-color, #f1f1f1);
+}
+
+body {
+  margin: 0;
+  background: var(--color-tg-bg);
+  color: var(--color-tg-text);
+  font-family: system-ui, -apple-system, sans-serif;
+}
