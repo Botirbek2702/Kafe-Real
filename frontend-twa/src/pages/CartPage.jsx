@@ -31,7 +31,7 @@ export default function CartPage({ onBack, onSuccess }) {
 
   useEffect(() => {
     if (!saved.name && tgUser?.id) {
-      import('../api/menu').then(({ supabase }) => {
+      import('../lib/supabase').then(({ supabase }) => {
         supabase.from('customers').select('full_name, phone').eq('telegram_id', tgUser.id).single().then(({ data }) => {
           if (data) {
             setForm(f => ({ ...f, name: data.full_name, phone: data.phone }))

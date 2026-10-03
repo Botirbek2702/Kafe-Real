@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../api/menu'
+import { supabase } from '../lib/supabase'
 import { useCart } from '../store/cart'
 import { formatNumber } from '../lib/format'
 import { tgUser } from '../lib/telegram'
