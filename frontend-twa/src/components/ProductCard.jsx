@@ -47,24 +47,53 @@ export default function ProductCard({ product }) {
         )}
 
         <div className="mt-2.5 border-t border-gold-600/10 pt-2.5">
-          <p className="mb-2.5 font-cinzel text-[15px] font-semibold tracking-wide text-gold-400">
-            {formatNumber(product.price)} <span className="font-sans text-[10px] font-normal text-stone-500">UZS</span>
-          </p>
-
-          {soldOut ? (
-            <button disabled className="h-10 w-full rounded-full border border-stone-700 text-xs text-stone-500">
-              Mavjud emas
-            </button>
-          ) : qty === 0 ? (
-            <button
-              type="button"
-              className="h-10 w-full rounded-full border border-gold-500/40 font-cinzel text-[11px] font-semibold tracking-[0.12em] text-gold-300 uppercase transition active:scale-95 active:bg-gold-500 active:text-obsidian-950"
-              onClick={() => { haptic(); add(product.id) }}
-            >
-              + Qo'shish
-            </button>
+          {product.variants ? (
+            <div className="flex flex-col gap-2">
+              {product.variants.map((v) => {
+                const vKey = `${product.id}_${v.name}`
+                const vQty = useCart((s) => s.items[vKey] ?? 0)
+                return (
+                  <div key={v.name} className="flex justify-between items-center rounded bg-obsidian-950 px-2 py-1.5 border border-gold-600/20">
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-semibold text-stone-300">{v.name}</span>
+                      <span className="text-[11px] font-bold text-gold-400">{formatNumber(v.price)} <span className="font-sans text-[9px] font-normal text-stone-500">UZS</span></span>
+                    </div>
+                    
+                    <div className="w-20 shrink-0">
+                      {soldOut ? (
+                        <button disabled className="h-7 w-full rounded-full border border-stone-700 text-[10px] text-stone-500">Tugadi</button>
+                      ) : vQty === 0 ? (
+                        <button onClick={() => { haptic(); add(product.id, v.name) }} className="h-7 w-full rounded-full bg-gold-500/10 text-[10px] font-bold text-gold-500 border border-gold-500/30">+</button>
+                      ) : (
+                        <div className="scale-[0.8] origin-right"><QtyControl qty={vQty} onAdd={() => add(product.id, v.name)} onRemove={() => remove(vKey)} /></div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           ) : (
-            <QtyControl qty={qty} onAdd={() => add(product.id)} onRemove={() => remove(product.id)} />
+            <>
+              <p className="mb-2.5 font-cinzel text-[15px] font-semibold tracking-wide text-gold-400">
+                {formatNumber(product.price)} <span className="font-sans text-[10px] font-normal text-stone-500">UZS</span>
+              </p>
+
+              {soldOut ? (
+                <button disabled className="h-10 w-full rounded-full border border-stone-700 text-xs text-stone-500">
+                  Mavjud emas
+                </button>
+              ) : qty === 0 ? (
+                <button
+                  type="button"
+                  className="h-10 w-full rounded-full border border-gold-500/40 font-cinzel text-[11px] font-semibold tracking-[0.12em] text-gold-300 uppercase transition active:scale-95 active:bg-gold-500 active:text-obsidian-950"
+                  onClick={() => { haptic(); add(product.id) }}
+                >
+                  + Qo'shish
+                </button>
+              ) : (
+                <QtyControl qty={qty} onAdd={() => add(product.id)} onRemove={() => remove(product.id)} />
+              )}
+            </>
           )}
         </div>
       </div>

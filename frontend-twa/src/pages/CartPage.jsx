@@ -61,7 +61,7 @@ export default function CartPage({ onBack, onSuccess }) {
         p_address: form.orderType === 'delivery' ? form.address.trim() : null,
         p_comment: form.comment.trim() || null,
         p_order_type: form.orderType,
-        p_items: lines.map((l) => ({ product_id: l.product.id, quantity: l.qty })),
+        p_items: lines.map((l) => ({ product_id: l.product.id, quantity: l.qty, variant: l.variantName || null })),
       })
       localStorage.setItem(SAVED_KEY, JSON.stringify({ name: form.name, phone: form.phone, orderType: form.orderType, address: form.address }))
       clear()
