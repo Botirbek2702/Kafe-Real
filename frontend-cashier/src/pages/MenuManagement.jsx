@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
-import { Check, X, Edit2, Save } from 'lucide-react'
+import { Edit2, Plus } from 'lucide-react'
+import ProductModal from '../components/ProductModal'
 
 export default function MenuManagement() {
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [editingId, setEditingId] = useState(null)
-  const [editPrice, setEditPrice] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState(null)
 
   useEffect(() => {
     fetchMenu()
@@ -40,35 +41,30 @@ export default function MenuManagement() {
     }
   }
 
-  const startEdit = (product) => {
-    setEditingId(product.id)
-    setEditPrice(product.price)
+  const openAddModal = () => {
+    setEditingProduct(null)
+    setModalOpen(true)
   }
 
-  const savePrice = async (id) => {
-    const newPrice = Number(editPrice)
-    if (isNaN(newPrice) || newPrice < 0) {
-      toast.error("Noto'g'ri narx")
-      return
-    }
+  const openEditModal = (product) => {
+    setEditingProduct(product)
+    setModalOpen(true)
+  }
 
-    const { error } = await supabase
-      .from('products')
-      .update({ price: newPrice })
-      .eq('id', id)
-      
-    if (error) {
-      toast.error("Narxni saqlashda xatolik")
-    } else {
-      setProducts(current => current.map(p => p.id === id ? { ...p, price: newPrice } : p))
-      setEditingId(null)
-      toast.success("Narx yangilandi")
-    }
+  const handleSaved = () => {
+    setModalOpen(false)
+    fetchMenu()
   }
 
   return (
     <div className="max-w-4xl mx-auto pb-12">
-      <h2 className="text-3xl font-cinzel text-gold-500 mb-8">Menyu Boshqaruvi</h2>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-cinzel text-gold-500">Menyu Boshqaruvi</h2>
+        <button onClick={openAddModal} className="flex items-center gap-2 bg-gold-500 text-obsidian-950 px-4 py-2 rounded-lg font-bold hover:bg-gold-400 transition-colors">
+          <Plus className="w-5 h-5" />
+          Yangi Taom
+        </button>
+      </div>
       
       {loading ? (
         <p className="text-gray-500">Yuklanmoqda...</p>
@@ -80,8 +76,9 @@ export default function MenuManagement() {
 
             return (
               <div key={category.id} className="bg-obsidian-900 border border-gray-800 rounded-xl overflow-hidden">
-                <div className="p-4 bg-obsidian-950 border-b border-gray-800">
+                <div className="p-4 bg-obsidian-950 border-b border-gray-800 flex justify-between items-center">
                   <h3 className="text-xl font-medium text-white">{category.name}</h3>
+                  <span className="text-xs text-gray-500">{categoryProducts.length} taom</span>
                 </div>
                 
                 <div className="divide-y divide-gray-800">
@@ -97,36 +94,21 @@ export default function MenuManagement() {
                           <p className={`font-medium text-lg ${!product.is_available && 'text-gray-500 line-through'}`}>
                             {product.name}
                           </p>
-                          <p className="text-sm text-gray-400 max-w-md truncate">{product.description}</p>
+                          <div className="flex gap-2 items-center mt-1">
+                            <p className="text-sm font-bold text-gold-400">{Number(product.price).toLocaleString()} so'm</p>
+                            {product.variants && product.variants.length > 0 && (
+                              <span className="text-[10px] bg-gold-500/10 text-gold-500 px-1.5 py-0.5 rounded border border-gold-500/20">
+                                +{product.variants.length} porsiya
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-6">
-                        {editingId === product.id ? (
-                          <div className="flex items-center gap-2">
-                            <input 
-                              type="number" 
-                              value={editPrice}
-                              onChange={(e) => setEditPrice(e.target.value)}
-                              className="w-24 bg-obsidian-950 border border-gold-500 rounded px-2 py-1 text-white focus:outline-none"
-                            />
-                            <button onClick={() => savePrice(product.id)} className="p-1.5 bg-green-600 hover:bg-green-500 rounded text-white transition-colors">
-                              <Save className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => setEditingId(null)} className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-white transition-colors">
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gold-400 text-lg w-24 text-right">
-                              {Number(product.price).toLocaleString()}
-                            </span>
-                            <button onClick={() => startEdit(product)} className="p-1.5 text-gray-400 hover:text-gold-500 transition-colors">
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
+                      <div className="flex items-center gap-4">
+                        <button onClick={() => openEditModal(product)} className="p-2 text-gray-400 hover:text-gold-500 bg-obsidian-950 rounded-lg border border-gray-800 hover:border-gold-500/30 transition-colors">
+                          <Edit2 className="w-4 h-4" />
+                        </button>
 
                         <button 
                           onClick={() => toggleAvailability(product.id, product.is_available)}
@@ -146,6 +128,15 @@ export default function MenuManagement() {
             )
           })}
         </div>
+      )}
+
+      {modalOpen && (
+        <ProductModal 
+          product={editingProduct} 
+          categories={categories} 
+          onClose={() => setModalOpen(false)} 
+          onSaved={handleSaved} 
+        />
       )}
     </div>
   )

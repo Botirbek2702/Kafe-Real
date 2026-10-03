@@ -99,6 +99,37 @@ process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
 
 // ==========================================
+// PENDING XABARLARNI YUBORISH (STARTUP)
+// ==========================================
+async function processPendingBroadcasts() {
+  const { data: pending } = await supabase.from('broadcast_messages').select('*').eq('status', 'pending')
+  if (!pending) return
+  
+  for (const broadcast of pending) {
+    const { data: customers } = await supabase.from('customers').select('telegram_id')
+    if (!customers) continue
+
+    let successCount = 0;
+    for (const customer of customers) {
+      try {
+        if (broadcast.image_url) {
+          await bot.telegram.sendPhoto(customer.telegram_id, broadcast.image_url, { caption: broadcast.message })
+        } else {
+          await bot.telegram.sendMessage(customer.telegram_id, broadcast.message)
+        }
+        successCount++;
+        await new Promise(r => setTimeout(r, 50)); 
+      } catch (e) {
+        console.error(`Foydalanuvchiga yuborib bo'lmadi: ${customer.telegram_id}`, e.message)
+      }
+    }
+    await supabase.from('broadcast_messages').update({ status: 'completed' }).eq('id', broadcast.id)
+    console.log(`Pending brodcast tugadi. ${successCount} kishiga yuborildi.`)
+  }
+}
+processPendingBroadcasts();
+
+// ==========================================
 // BUYURTMA HOLATI (STATUS) UCHUN REALTIME
 // ==========================================
 function getStatusMessage(status, orderId) {
