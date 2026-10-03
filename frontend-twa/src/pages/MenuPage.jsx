@@ -5,7 +5,7 @@ import { formatNumber } from '../lib/format'
 import { tgUser, haptic } from '../lib/telegram'
 import ProductCard from '../components/ProductCard'
 
-export default function MenuPage({ onOpenCart }) {
+export default function MenuPage({ onOpenCart, onOpenOrders }) {
   const { data, isLoading, isError, refetch } = useMenu()
   const items = useCart((s) => s.items)
   const [observedActive, setActive] = useState(null)
@@ -60,8 +60,13 @@ export default function MenuPage({ onOpenCart }) {
   return (
     <div className="pb-32">
       {/* Sarlavha */}
-      <header className="relative overflow-hidden px-5 pt-6 pb-5 text-center">
+      <header className="relative overflow-hidden px-5 pt-6 pb-5 text-center flex flex-col items-center">
         <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-72 -translate-x-1/2 rounded-full bg-gold-500/10 blur-3xl" />
+        <div className="absolute top-4 right-4 z-10">
+          <button onClick={onOpenOrders} className="text-[10px] font-cinzel font-bold text-gold-400 bg-gold-500/10 border border-gold-500/30 px-3 py-1.5 rounded-full tracking-wider uppercase">
+            Buyurtmalarim
+          </button>
+        </div>
         <img src="/logo.webp" alt="Abdulaziz Kafe" className="relative mx-auto h-16 w-16 rounded-full border-2 border-gold-500/50 object-cover shadow-lg shadow-black/50" />
         <h1 className="text-gold-gradient relative mt-3 font-serif text-[32px] leading-tight font-semibold">Abdulaziz Kafe</h1>
         <p className="mt-1 font-cinzel text-[10px] tracking-[0.3em] text-gold-400 uppercase">
