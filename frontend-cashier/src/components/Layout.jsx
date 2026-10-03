@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { LayoutDashboard, ShoppingBag, Utensils, LogOut, Printer } from 'lucide-react'
+import { LayoutDashboard, ShoppingBag, Utensils, LogOut, Users, Send } from 'lucide-react'
 
 export default function Layout() {
   const navigate = useNavigate()
@@ -14,6 +14,8 @@ export default function Layout() {
     { to: '/', icon: LayoutDashboard, label: 'Boshqaruv' },
     { to: '/orders', icon: ShoppingBag, label: 'Buyurtmalar' },
     { to: '/menu', icon: Utensils, label: 'Menyu' },
+    { to: '/customers', icon: Users, label: 'Mijozlar' },
+    { to: '/marketing', icon: Send, label: 'Marketing' },
   ]
 
   return (

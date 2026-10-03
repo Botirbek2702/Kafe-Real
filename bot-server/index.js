@@ -131,3 +131,43 @@ supabase
     }
   )
   .subscribe()
+
+// ==========================================
+// MARKETING (XABAR TARQATISH) UCHUN REALTIME
+// ==========================================
+supabase
+  .channel('bot-marketing')
+  .on(
+    'postgres_changes',
+    { event: 'INSERT', schema: 'public', table: 'broadcast_messages' },
+    async (payload) => {
+      const broadcast = payload.new
+      
+      // Bazadan barcha mijozlarni olamiz
+      const { data: customers } = await supabase.from('customers').select('telegram_id')
+      if (!customers) return
+
+      let successCount = 0;
+      
+      // Xabarni barchaga yuborish
+      for (const customer of customers) {
+        try {
+          if (broadcast.image_url) {
+            await bot.telegram.sendPhoto(customer.telegram_id, broadcast.image_url, { caption: broadcast.message })
+          } else {
+            await bot.telegram.sendMessage(customer.telegram_id, broadcast.message)
+          }
+          successCount++;
+          // Telegram API limitlariga tushib qolmaslik uchun kichik tanaffus
+          await new Promise(r => setTimeout(r, 50)); 
+        } catch (e) {
+          console.error(`Foydalanuvchiga yuborib bo'lmadi: ${customer.telegram_id}`, e.message)
+        }
+      }
+
+      // Statusni yakunlangan qilib qo'yish
+      await supabase.from('broadcast_messages').update({ status: 'completed' }).eq('id', broadcast.id)
+      console.log(`Brodcast tugadi. ${successCount} kishiga yuborildi.`)
+    }
+  )
+  .subscribe()

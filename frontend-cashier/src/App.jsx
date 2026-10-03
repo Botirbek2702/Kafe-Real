@@ -7,6 +7,8 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Orders from './pages/Orders'
 import MenuManagement from './pages/MenuManagement'
+import Customers from './pages/Customers'
+import Marketing from './pages/Marketing'
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
@@ -33,6 +35,8 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="orders" element={<Orders />} />
             <Route path="menu" element={<MenuManagement />} />
+            <Route path="customers" element={<Customers />} />
+            <Route path="marketing" element={<Marketing />} />
           </Route>
         </Routes>
       </BrowserRouter>
