@@ -1,14 +1,49 @@
 @import "tailwindcss";
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f3f4f6;
+@theme {
+  --color-obsidian-950: #0b0f12;
+  --color-obsidian-900: #141b21;
+  --color-obsidian-800: #1c2730;
+  
+  --color-gold-500: #d4af37;
+  --color-gold-400: #e6c863;
+  --color-gold-600: #aa8c2c;
+
+  --font-serif: "Playfair Display", serif;
+  --font-cinzel: "Cinzel", serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
 }
 
-/* Termal printer (80mm) uchun chek */
+@layer base {
+  body {
+    @apply bg-obsidian-950 text-white font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-cinzel tracking-wider text-gold-500;
+  }
+}
+
+/* Print styles for thermal printer */
 @media print {
-  body * { visibility: hidden; }
-  #receipt, #receipt * { visibility: visible; }
-  #receipt { position: absolute; left: 0; top: 0; width: 80mm; }
+  @page {
+    margin: 0;
+    size: 80mm auto;
+  }
+  body {
+    background: white;
+    color: black;
+    font-family: monospace;
+    width: 80mm;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  * {
+    color: black !important;
+    background: transparent !important;
+  }
 }
