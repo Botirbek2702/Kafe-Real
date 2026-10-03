@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
-import { X, Plus, Trash2 } from 'lucide-react'
+import { X, Plus, Trash2, Upload } from 'lucide-react'
 
 export default function ProductModal({ product, categories, onClose, onSaved }) {
   const [form, setForm] = useState({
@@ -14,6 +14,8 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
     variants: []
   })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     if (product) {
@@ -41,6 +43,31 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
 
   const removeVariant = (index) => {
     setForm(f => ({ ...f, variants: f.variants.filter((_, i) => i !== index) }))
+  }
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploading(true)
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Math.random()}.${fileExt}`
+    const filePath = `images/${fileName}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('menu')
+      .upload(filePath, file)
+
+    if (uploadError) {
+      toast.error("Rasm yuklashda xatolik: " + uploadError.message)
+      setUploading(false)
+      return
+    }
+
+    const { data } = supabase.storage.from('menu').getPublicUrl(filePath)
+    setForm(f => ({ ...f, image_url: data.publicUrl }))
+    setUploading(false)
+    toast.success("Rasm yuklandi!")
   }
 
   const handleSubmit = async (e) => {
@@ -108,11 +135,33 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
                 </div>
               </div>
               
-              <div className="w-28 shrink-0 flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-lg bg-obsidian-950 overflow-hidden">
+              <div className="w-28 shrink-0 flex flex-col items-center justify-center border border-gray-700 rounded-lg bg-obsidian-950 overflow-hidden relative group">
                 {form.image_url ? (
                   <img src={form.image_url} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-xs text-gray-500 text-center px-2">Rasm havolasini kiriting</span>
+                  <span className="text-xs text-gray-500 text-center px-2">Rasm tanlang</span>
+                )}
+                
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                >
+                  <Upload className="w-6 h-6 text-white mb-1" />
+                  <span className="text-[10px] text-white">Yuklash</span>
+                </div>
+                
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleImageUpload} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                    <span className="text-xs text-white">Yuklanmoqda...</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -124,7 +173,7 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
 
             <div>
               <label className="block text-sm text-gray-400 mb-1">Rasm havolasi (URL)</label>
-              <input type="url" value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} className="w-full bg-obsidian-950 border border-gray-700 rounded px-3 py-2 text-white focus:border-gold-500 outline-none" placeholder="https://..." />
+              <input type="url" value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} className="w-full bg-obsidian-950 border border-gray-700 rounded px-3 py-2 text-white focus:border-gold-500 outline-none" placeholder="https://... yoki kompyuterdan yuklang" />
             </div>
 
             <div>
