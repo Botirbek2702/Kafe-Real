@@ -73,7 +73,7 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
     }
 
     if (error) {
-      toast.error("Xatolik yuz berdi")
+      toast.error("Xatolik: " + error.message)
       console.error(error)
     } else {
       toast.success("Muvaffaqiyatli saqlandi!")
