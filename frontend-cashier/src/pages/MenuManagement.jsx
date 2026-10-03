@@ -60,6 +60,33 @@ export default function MenuManagement() {
     setAddingCategory(false)
   }
 
+  const handleDeleteCategory = async (id, productCount) => {
+    if (productCount > 0) {
+      toast.error("Oldin bu kategoriyadagi taomlarni o'chiring yoki boshqa kategoriyaga o'tkazing")
+      return
+    }
+    if (!confirm("Kategoriyani o'chirishni tasdiqlaysizmi?")) return
+    
+    const { error } = await supabase.from('categories').delete().eq('id', id)
+    if (error) toast.error("Xatolik: " + error.message)
+    else {
+      toast.success("Kategoriya o'chirildi")
+      fetchMenu()
+    }
+  }
+
+  const handleEditCategory = async (category) => {
+    const newName = prompt("Kategoriya yangi nomini kiriting:", category.name)
+    if (!newName || newName.trim() === category.name) return
+    
+    const { error } = await supabase.from('categories').update({ name: newName.trim() }).eq('id', category.id)
+    if (error) toast.error("Xatolik: " + error.message)
+    else {
+      toast.success("Nomi o'zgardi")
+      fetchMenu()
+    }
+  }
+
   const openAddModal = () => {
     setEditingProduct(null)
     setModalOpen(true)
@@ -123,8 +150,14 @@ export default function MenuManagement() {
 
             return (
               <div key={category.id} className="bg-obsidian-900 border border-gray-800 rounded-xl overflow-hidden">
-                <div className="p-4 bg-obsidian-950 border-b border-gray-800 flex justify-between items-center">
-                  <h3 className="text-xl font-medium text-white">{category.name}</h3>
+                <div className="p-4 bg-obsidian-950 border-b border-gray-800 flex justify-between items-center group">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-xl font-medium text-white">{category.name}</h3>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                      <button onClick={() => handleEditCategory(category)} className="text-gray-500 hover:text-gold-500 text-xs px-2 py-1 rounded">O'zgartirish</button>
+                      <button onClick={() => handleDeleteCategory(category.id, categoryProducts.length)} className="text-gray-500 hover:text-red-500 text-xs px-2 py-1 rounded">O'chirish</button>
+                    </div>
+                  </div>
                   <span className="text-xs text-gray-500">{categoryProducts.length} taom</span>
                 </div>
                 
@@ -144,11 +177,26 @@ export default function MenuManagement() {
                           <p className={`font-medium text-lg ${!product.is_available && 'text-gray-500 line-through'}`}>
                             {product.name}
                           </p>
-                          <div className="flex gap-2 items-center mt-1">
+                          <div className="flex flex-wrap gap-2 items-center mt-1">
                             <p className="text-sm font-bold text-gold-400">{Number(product.price).toLocaleString()} so'm</p>
                             {product.variants && product.variants.length > 0 && (
                               <span className="text-[10px] bg-gold-500/10 text-gold-500 px-1.5 py-0.5 rounded border border-gold-500/20">
                                 +{product.variants.length} porsiya
+                              </span>
+                            )}
+                            {product.addons && product.addons.length > 0 && (
+                              <span className="text-[10px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
+                                +{product.addons.length} qo'shimcha
+                              </span>
+                            )}
+                            {product.ready_time && (
+                              <span className="text-[10px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded border border-purple-500/20">
+                                🕒 {product.ready_time}
+                              </span>
+                            )}
+                            {product.promo_text && (
+                              <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20">
+                                🎁 {product.promo_text}
                               </span>
                             )}
                           </div>

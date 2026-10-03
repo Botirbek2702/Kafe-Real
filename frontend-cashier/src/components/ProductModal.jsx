@@ -11,7 +11,10 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
     image_url: '',
     category_id: categories[0]?.id || '',
     is_available: true,
-    variants: []
+    variants: [],
+    addons: [],
+    ready_time: '',
+    promo_text: ''
   })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -26,24 +29,29 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
         image_url: product.image_url || '',
         category_id: product.category_id || categories[0]?.id || '',
         is_available: product.is_available,
-        variants: product.variants || []
+        variants: product.variants || [],
+        addons: product.addons || [],
+        ready_time: product.ready_time || '',
+        promo_text: product.promo_text || ''
       })
     }
   }, [product, categories])
 
-  const addVariant = () => {
-    setForm(f => ({ ...f, variants: [...f.variants, { name: '', price: '' }] }))
-  }
-
+  const addVariant = () => setForm(f => ({ ...f, variants: [...f.variants, { name: '', price: '' }] }))
   const updateVariant = (index, field, value) => {
     const newVars = [...form.variants]
     newVars[index][field] = value
     setForm(f => ({ ...f, variants: newVars }))
   }
+  const removeVariant = (index) => setForm(f => ({ ...f, variants: f.variants.filter((_, i) => i !== index) }))
 
-  const removeVariant = (index) => {
-    setForm(f => ({ ...f, variants: f.variants.filter((_, i) => i !== index) }))
+  const addAddon = () => setForm(f => ({ ...f, addons: [...f.addons, { name: '', price: '' }] }))
+  const updateAddon = (index, field, value) => {
+    const newAddons = [...form.addons]
+    newAddons[index][field] = value
+    setForm(f => ({ ...f, addons: newAddons }))
   }
+  const removeAddon = (index) => setForm(f => ({ ...f, addons: f.addons.filter((_, i) => i !== index) }))
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0]
@@ -74,11 +82,8 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
     e.preventDefault()
     setSaving(true)
 
-    // Validate variants
-    const validVariants = form.variants.filter(v => v.name.trim() && v.price).map(v => ({
-      name: v.name.trim(),
-      price: Number(v.price)
-    }))
+    const validVariants = form.variants.filter(v => v.name.trim() && v.price).map(v => ({ name: v.name.trim(), price: Number(v.price) }))
+    const validAddons = form.addons.filter(a => a.name.trim() && a.price).map(a => ({ name: a.name.trim(), price: Number(a.price) }))
 
     const payload = {
       name: form.name.trim(),
@@ -87,7 +92,10 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
       image_url: form.image_url.trim() || null,
       category_id: Number(form.category_id),
       is_available: form.is_available,
-      variants: validVariants.length > 0 ? validVariants : null
+      variants: validVariants.length > 0 ? validVariants : null,
+      addons: validAddons.length > 0 ? validAddons : null,
+      ready_time: form.ready_time.trim() || null,
+      promo_text: form.promo_text.trim() || null
     }
 
     let error
@@ -205,7 +213,42 @@ export default function ProductModal({ product, categories, onClose, onSaved }) 
               )}
             </div>
 
-            <div className="mt-4 flex items-center gap-3">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm text-gray-400 mb-1">Qachon tayyor bo'ladi? (Ixtiyoriy)</label>
+                <input type="text" value={form.ready_time} onChange={e => setForm({...form, ready_time: e.target.value})} className="w-full bg-obsidian-950 border border-gray-700 rounded px-3 py-2 text-white focus:border-gold-500 outline-none" placeholder="Masalan: 13:00 da" />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm text-gray-400 mb-1">Aksiya / Bonus (Ixtiyoriy)</label>
+                <input type="text" value={form.promo_text} onChange={e => setForm({...form, promo_text: e.target.value})} className="w-full bg-obsidian-950 border border-gray-700 rounded px-3 py-2 text-white focus:border-gold-500 outline-none" placeholder="Masalan: Cola tekin" />
+              </div>
+            </div>
+
+            {/* ADDONS (QO'SHIMCHALAR) */}
+            <div className="mt-6 border-t border-gray-800 pt-4">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-sm font-semibold text-gold-400 uppercase tracking-wider">Qo'shimchalar (Add-ons)</h4>
+                <button type="button" onClick={addAddon} className="text-xs flex items-center gap-1 bg-gold-500/10 text-gold-500 px-2 py-1 rounded hover:bg-gold-500/20">
+                  <Plus className="w-3 h-3" /> Qo'shish
+                </button>
+              </div>
+
+              {form.addons.length === 0 ? (
+                <p className="text-xs text-gray-500">Mijoz tanlashi mumkin bo'lgan qo'shimchalar (sous, qaymoq...).</p>
+              ) : (
+                <div className="space-y-2">
+                  {form.addons.map((v, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input required type="text" placeholder="Nomi (Masalan: Sous)" value={v.name} onChange={e => updateAddon(i, 'name', e.target.value)} className="w-1/2 bg-obsidian-950 border border-gray-700 rounded px-3 py-1.5 text-sm text-white focus:border-gold-500 outline-none" />
+                      <input required type="number" placeholder="Narxi" value={v.price} onChange={e => updateAddon(i, 'price', e.target.value)} className="w-1/2 bg-obsidian-950 border border-gray-700 rounded px-3 py-1.5 text-sm text-white focus:border-gold-500 outline-none" />
+                      <button type="button" onClick={() => removeAddon(i)} className="text-red-400 p-1.5 hover:bg-red-500/10 rounded"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex items-center gap-3 border-t border-gray-800 pt-4">
               <input type="checkbox" id="avail" checked={form.is_available} onChange={e => setForm({...form, is_available: e.target.checked})} className="w-4 h-4 accent-gold-500" />
               <label htmlFor="avail" className="text-sm text-gray-300">Menyuda ko'rsatish (Mavjud)</label>
             </div>
