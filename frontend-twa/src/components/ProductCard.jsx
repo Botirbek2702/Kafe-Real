@@ -89,7 +89,7 @@ export default function ProductCard({ product }) {
         {soldOut && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/55">
             <span className="rounded-full border border-gold-500/40 bg-obsidian-950/80 px-3 py-1 font-cinzel text-[11px] tracking-[0.15em] text-gold-400">
-              TUGADI
+              {product.ready_time ? 'KUTILMOQDA' : 'TUGADI'}
             </span>
           </div>
         )}
@@ -137,7 +137,7 @@ export default function ProductCard({ product }) {
                     
                     <div className="w-20 shrink-0">
                       {soldOut ? (
-                        <button disabled className="h-7 w-full rounded-full border border-stone-700 text-[10px] text-stone-500">Tugadi</button>
+                        <button disabled className="h-7 w-full rounded-full border border-stone-700 text-[10px] text-stone-500">{product.ready_time ? 'Kutilmoqda' : 'Tugadi'}</button>
                       ) : vQty === 0 ? (
                         <button onClick={() => handleAdd(v.name)} className="h-7 w-full rounded-full bg-gold-500/10 text-[10px] font-bold text-gold-500 border border-gold-500/30">+</button>
                       ) : (
@@ -156,7 +156,7 @@ export default function ProductCard({ product }) {
 
               {soldOut ? (
                 <button disabled className="h-10 w-full rounded-full border border-stone-700 text-xs text-stone-500">
-                  Mavjud emas
+                  {product.ready_time ? 'Hali tayyor emas' : 'Mavjud emas'}
                 </button>
               ) : getQty() === 0 ? (
                 <button
