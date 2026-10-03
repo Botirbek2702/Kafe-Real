@@ -1,23 +1,31 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { tg, initTelegram } from './lib/telegram'
+import MenuPage from './pages/MenuPage'
+import CartPage from './pages/CartPage'
+import SuccessPage from './pages/SuccessPage'
 
-const tg = window.Telegram?.WebApp
-
+// Oddiy sahifa almashtirish (router kutubxonasi shart emas — ilova yengil bo'ladi)
 function App() {
+  const [page, setPage] = useState({ name: 'menu' })
+
+  useEffect(() => { initTelegram() }, [])
+
+  // Telegram'ning tepadagi "Orqaga" tugmasi
   useEffect(() => {
-    tg?.ready()
-    tg?.expand()
-  }, [])
+    const back = tg?.BackButton
+    if (!back) return
+    const goMenu = () => setPage({ name: 'menu' })
+    if (page.name === 'cart') { back.show(); back.onClick(goMenu) } else back.hide()
+    return () => back.offClick(goMenu)
+  }, [page.name])
 
-  const user = tg?.initDataUnsafe?.user
+  useEffect(() => { window.scrollTo(0, 0) }, [page.name])
 
-  return (
-    <div className="min-h-screen p-4">
-      <h1 className="text-2xl font-bold">🍽 Menyu</h1>
-      <p className="mt-2 text-tg-hint">
-        {user ? `Salom, ${user.first_name}!` : 'Telegram tashqarisida ochildi (test rejimi)'}
-      </p>
-    </div>
-  )
+  if (page.name === 'cart')
+    return <CartPage onBack={() => setPage({ name: 'menu' })} onSuccess={(id) => setPage({ name: 'success', orderId: id })} />
+  if (page.name === 'success')
+    return <SuccessPage orderId={page.orderId} onBack={() => setPage({ name: 'menu' })} />
+  return <MenuPage onOpenCart={() => setPage({ name: 'cart' })} />
 }
 
 export default App
