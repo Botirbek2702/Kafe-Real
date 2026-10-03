@@ -23,9 +23,7 @@ export default function Orders() {
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
         setOrders(current => current.map(o => o.id === payload.new.id ? { ...o, status: payload.new.status } : o))
-        if (selectedOrder?.id === payload.new.id) {
-          setSelectedOrder(current => ({ ...current, status: payload.new.status }))
-        }
+        setSelectedOrder(current => current?.id === payload.new.id ? { ...current, status: payload.new.status } : current)
       })
       .subscribe()
 
@@ -232,7 +230,7 @@ export default function Orders() {
             </div>
 
             {/* Print Only Receipt */}
-            <div className="print-only hidden p-4">
+            <div className="hidden print:block p-4 text-black bg-white">
               <div className="text-center mb-4">
                 <h1 className="text-2xl font-bold font-serif mb-1">KAFE</h1>
                 <p className="text-sm border-b pb-2 border-black">Buyurtma #{selectedOrder.id}</p>
