@@ -112,7 +112,7 @@ export default function Orders() {
   }
 
   return (
-    <div className="flex h-full gap-6 p-8">
+    <div className="flex-1 flex gap-6 p-8 overflow-hidden">
       {/* Orders List */}
       <div className="w-1/3 flex flex-col bg-obsidian-900 border border-gray-800 rounded-xl overflow-hidden no-print">
         <div className="p-4 border-b border-gray-800 bg-obsidian-950">

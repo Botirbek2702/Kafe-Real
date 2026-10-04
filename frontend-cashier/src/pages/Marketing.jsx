@@ -57,7 +57,8 @@ export default function Marketing() {
   }
 
   return (
-    <div className="flex gap-8">
+    <div className="flex-1 overflow-y-auto p-8 w-full">
+      <div className="flex gap-8">
       {/* Send Form */}
       <div className="w-1/2">
         <h2 className="text-3xl font-cinzel text-gold-500 mb-8">Marketing va Xabarnomalar</h2>
@@ -148,6 +149,7 @@ export default function Marketing() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   )

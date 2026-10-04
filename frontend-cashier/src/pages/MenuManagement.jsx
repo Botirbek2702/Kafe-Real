@@ -105,7 +105,8 @@ export default function MenuManagement() {
   const filteredProducts = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div className="max-w-4xl mx-auto pb-12">
+    <div className="flex-1 overflow-y-auto p-8 w-full">
+      <div className="max-w-4xl mx-auto pb-12">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-cinzel text-gold-500">Menyu Boshqaruvi</h2>
         <button onClick={openAddModal} className="flex items-center gap-2 bg-gold-500 text-obsidian-950 px-4 py-2 rounded-lg font-bold hover:bg-gold-400 transition-colors">
@@ -241,6 +242,7 @@ export default function MenuManagement() {
           onSaved={handleSaved} 
         />
       )}
+      </div>
     </div>
   )
 }

@@ -48,8 +48,9 @@ export default function Customers() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
+    <div className="flex-1 overflow-y-auto p-8 w-full">
+      <div>
+        <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-cinzel text-gold-500">Mijozlar Bazasi</h2>
         <div className="bg-obsidian-900 border border-gray-800 rounded-lg px-4 py-2 flex items-center gap-2">
           <Users className="w-5 h-5 text-gold-500" />
@@ -107,6 +108,7 @@ export default function Customers() {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
   )

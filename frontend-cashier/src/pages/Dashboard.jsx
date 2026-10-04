@@ -97,7 +97,7 @@ export default function Dashboard() {
   if (loading) return <div className="text-gray-500">Yuklanmoqda...</div>
 
   return (
-    <div className="pb-12">
+    <div className="flex-1 overflow-y-auto p-8 pb-12 w-full">
       <h2 className="text-3xl font-cinzel text-gold-500 mb-8">Statistika va Analitika</h2>
 
       {/* TOP KARTALAR */}

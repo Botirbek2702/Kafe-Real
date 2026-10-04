@@ -93,7 +93,7 @@ export default function Layout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-hidden bg-obsidian-950 flex flex-col relative print:bg-white">
+      <main className="flex-1 bg-obsidian-950 flex flex-col relative print:bg-white overflow-hidden">
         <Outlet />
       </main>
     </div>
