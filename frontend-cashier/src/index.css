@@ -74,3 +74,12 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #4b5563; /* gray-600 */
 }
+
+@media print {
+  @page { margin: 0; }
+  body, html { background: white !important; color: black !important; overflow: visible !important; height: auto !important; }
+  #root { display: block !important; height: auto !important; overflow: visible !important; }
+  .no-print { display: none !important; }
+  #print-receipt { display: block !important; width: 100% !important; position: static !important; padding: 20px !important; }
+  #print-receipt * { color: black !important; border-color: #000 !important; }
+}

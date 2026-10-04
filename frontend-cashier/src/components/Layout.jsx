@@ -44,9 +44,9 @@ export default function Layout() {
   ]
 
   return (
-    <div className="flex h-screen bg-obsidian-950 overflow-hidden no-print">
+    <div className="flex h-screen bg-obsidian-950 overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 bg-obsidian-900 border-r border-gray-800 flex flex-col">
+      <aside className="w-64 bg-obsidian-900 border-r border-gray-800 flex flex-col no-print">
         <div className="p-6 border-b border-gray-800">
           <h1 className="text-2xl text-gold-500 flex items-center gap-2">
             <Utensils className="w-6 h-6" />
@@ -93,7 +93,7 @@ export default function Layout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-obsidian-950 p-8">
+      <main className="flex-1 overflow-hidden bg-obsidian-950 flex flex-col relative print:bg-white">
         <Outlet />
       </main>
     </div>

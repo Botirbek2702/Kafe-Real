@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
-import { playBeep } from '../lib/audio'
+import { playBeep } from '../lib/sound'
 import { Printer, CheckCircle, XCircle } from 'lucide-react'
 
 export default function Orders() {
@@ -22,8 +22,7 @@ export default function Orders() {
         fetchOrders() // Re-fetch to get items joined data
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
-        setOrders(current => current.map(o => o.id === payload.new.id ? { ...o, status: payload.new.status } : o))
-        setSelectedOrder(current => current?.id === payload.new.id ? { ...current, status: payload.new.status } : current)
+        fetchOrders()
       })
       .subscribe()
 
@@ -31,6 +30,13 @@ export default function Orders() {
       supabase.removeChannel(channel)
     }
   }, [])
+
+  useEffect(() => {
+    if (selectedOrder) {
+      const fresh = orders.find(o => o.id === selectedOrder.id)
+      if (fresh) setSelectedOrder(fresh)
+    }
+  }, [orders])
 
   const fetchOrders = async () => {
     setLoading(true)
@@ -106,7 +112,7 @@ export default function Orders() {
   }
 
   return (
-    <div className="flex h-full gap-6">
+    <div className="flex h-full gap-6 p-8">
       {/* Orders List */}
       <div className="w-1/3 flex flex-col bg-obsidian-900 border border-gray-800 rounded-xl overflow-hidden no-print">
         <div className="p-4 border-b border-gray-800 bg-obsidian-950">
