@@ -28,6 +28,7 @@ export default function CartPage({ onBack, onSuccess }) {
   })
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
+  const [locating, setLocating] = useState(false)
 
   useEffect(() => {
     if (!saved.name && tgUser?.id) {
@@ -154,7 +155,54 @@ export default function CartPage({ onBack, onSuccess }) {
           <input className="field" placeholder="Ismingiz" value={form.name} onChange={set('name')} autoComplete="name" />
           <input className="field" placeholder="+998 90 123 45 67" value={form.phone} onChange={set('phone')} type="tel" inputMode="tel" autoComplete="tel" />
           {form.orderType === 'delivery' && (
-            <textarea className="field resize-none" rows={2} placeholder="Manzil (ko'cha, uy, mo'ljal)" value={form.address} onChange={set('address')} />
+            <div className="relative">
+              <textarea 
+                className="field resize-none pr-12" 
+                rows={2} 
+                placeholder="Manzil (ko'cha, uy, mo'ljal)" 
+                value={form.address} 
+                onChange={set('address')} 
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!navigator.geolocation) return alert("Geolokatsiya qo'llab-quvvatlanmaydi")
+                  setLocating(true)
+                  haptic()
+                  navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                      try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&accept-language=uz`)
+                        const data = await res.json()
+                        setForm((f) => ({ ...f, address: data.display_name || `${pos.coords.latitude}, ${pos.coords.longitude}` }))
+                        hapticSuccess()
+                      } catch {
+                        alert("Manzilni aniqlab bo'lmadi")
+                      } finally {
+                        setLocating(false)
+                      }
+                    },
+                    (err) => {
+                      setLocating(false)
+                      if (err.code === 1) alert("Iltimos, manzilni aniqlashga ruxsat bering (Location).")
+                      else alert("Joylashuvni aniqlab bo'lmadi.")
+                    },
+                    { enableHighAccuracy: true }
+                  )
+                }}
+                disabled={locating}
+                className="absolute right-2 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 transition-colors active:bg-gold-500/30"
+              >
+                {locating ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-gold-400 border-t-transparent" />
+                ) : (
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="10" r="3" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
+            </div>
           )}
           <textarea className="field resize-none" rows={2} placeholder="Izoh (ixtiyoriy)" value={form.comment} onChange={set('comment')} />
         </div>
