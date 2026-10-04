@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useCart } from '../store/cart'
 import { formatNumber } from '../lib/format'
-import { tgUser } from '../lib/telegram'
+import { tgUser, hapticSuccess } from '../lib/telegram'
 import { format } from 'date-fns'
 
 const getStatusLabel = (status) => {
@@ -24,10 +24,31 @@ export default function OrdersPage({ onBack }) {
 
   useEffect(() => {
     fetchOrders()
+
+    const channel = supabase
+      .channel('my-orders-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          // Agar ushbu foydalanuvchining buyurtmasi yangilansa yoki qo'shilsa
+          const orderTelegramId = payload.new?.telegram_id || payload.old?.telegram_id
+          if (!orderTelegramId || orderTelegramId === (tgUser?.id || 0)) {
+            fetchOrders()
+            if (payload.eventType === 'UPDATE') {
+              hapticSuccess()
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   const fetchOrders = async () => {
-    setLoading(true)
     const { data } = await supabase.rpc('get_my_orders', { p_telegram_id: tgUser?.id || 0 })
     if (data) setOrders(data)
     setLoading(false)
