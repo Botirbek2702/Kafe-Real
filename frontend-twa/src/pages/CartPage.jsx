@@ -32,9 +32,9 @@ export default function CartPage({ onBack, onSuccess }) {
   useEffect(() => {
     if (!saved.name && tgUser?.id) {
       import('../lib/supabase').then(({ supabase }) => {
-        supabase.from('customers').select('full_name, phone').eq('telegram_id', tgUser.id).single().then(({ data }) => {
-          if (data) {
-            setForm(f => ({ ...f, name: data.full_name, phone: data.phone }))
+        supabase.rpc('get_customer_profile', { p_telegram_id: tgUser.id }).then(({ data }) => {
+          if (data && data[0]) {
+            setForm(f => ({ ...f, name: data[0].full_name, phone: data[0].phone }))
           }
         })
       })

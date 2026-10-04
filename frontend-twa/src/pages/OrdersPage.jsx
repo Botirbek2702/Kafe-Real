@@ -28,20 +28,16 @@ export default function OrdersPage({ onBack }) {
 
   const fetchOrders = async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('telegram_id', tgUser?.id || 0)
-      .order('created_at', { ascending: false })
-    
+    const { data } = await supabase.rpc('get_my_orders', { p_telegram_id: tgUser?.id || 0 })
     if (data) setOrders(data)
     setLoading(false)
   }
 
   const handleCancel = async (orderId) => {
     if (!confirm("Buyurtmani haqiqatan ham bekor qilmoqchimisiz?")) return
-    await supabase.from('orders').update({ status: 'cancelled' }).eq('id', orderId)
-    fetchOrders()
+    const { error } = await supabase.rpc('cancel_my_order', { p_order_id: orderId, p_telegram_id: tgUser?.id || 0 })
+    if (error) alert(error.message)
+    else fetchOrders()
   }
 
   return (
@@ -92,7 +88,8 @@ export default function OrdersPage({ onBack }) {
                     <div className="flex gap-2">
                       <button onClick={() => {
                         if(confirm("Buyurtmani tahrirlash uchun eski buyurtma bekor qilinib, barcha taomlar savatchaga qaytariladi. Rozimisiz?")) {
-                          supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id).then(() => {
+                          supabase.rpc('cancel_my_order', { p_order_id: order.id, p_telegram_id: tgUser?.id || 0 }).then(({ error }) => {
+                            if (error) return alert(error.message)
                             clear(); // clear current cart
                             // Add all items back
                             order.order_items.forEach(item => {
