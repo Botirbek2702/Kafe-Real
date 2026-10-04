@@ -105,41 +105,41 @@ export default function MenuManagement() {
   const filteredProducts = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 w-full">
-      <div className="max-w-4xl mx-auto pb-12">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-cinzel text-gold-500">Menyu Boshqaruvi</h2>
-        <button onClick={openAddModal} className="flex items-center gap-2 bg-gold-500 text-obsidian-950 px-4 py-2 rounded-lg font-bold hover:bg-gold-400 transition-colors">
-          <Plus className="w-5 h-5" />
-          Yangi Taom
-        </button>
-      </div>
-
-      <div className="flex gap-4 mb-8">
-        <div className="flex-1 relative">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Taom izlash..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-obsidian-900 border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-gold-500 transition-colors"
-          />
-        </div>
-        
-        <form onSubmit={handleAddCategory} className="flex gap-2 w-1/3">
-          <input 
-            type="text" 
-            placeholder="Yangi kategoriya (Ichimliklar...)" 
-            value={newCategoryName}
-            onChange={(e) => setNewCategoryName(e.target.value)}
-            className="w-full bg-obsidian-900 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-500 transition-colors"
-          />
-          <button disabled={addingCategory || !newCategoryName.trim()} type="submit" className="px-4 py-2 bg-obsidian-800 hover:bg-obsidian-700 text-white rounded-lg transition-colors flex items-center justify-center">
-            <FolderPlus className="w-5 h-5" />
+    <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-12 w-full">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl font-cinzel text-gold-500 font-semibold">Menyu Boshqaruvi</h2>
+          <button onClick={openAddModal} className="w-full sm:w-auto justify-center flex items-center gap-2 bg-gold-500 text-obsidian-950 px-4 py-2.5 rounded-lg font-bold hover:bg-gold-400 transition-colors text-sm">
+            <Plus className="w-4 h-4 md:w-5 md:h-5" />
+            Yangi Taom
           </button>
-        </form>
-      </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 mb-6 md:mb-8">
+          <div className="flex-1 relative">
+            <Search className="w-4 h-4 md:w-5 md:h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Taom izlash..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-obsidian-900 border border-gray-800 rounded-lg pl-9 md:pl-10 pr-4 py-2.5 md:py-3 text-sm text-white focus:outline-none focus:border-gold-500 transition-colors"
+            />
+          </div>
+          
+          <form onSubmit={handleAddCategory} className="flex gap-2 w-full sm:w-80">
+            <input 
+              type="text" 
+              placeholder="Yangi kategoriya..." 
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              className="flex-1 bg-obsidian-900 border border-gray-800 rounded-lg px-3.5 py-2.5 md:py-3 text-sm text-white focus:outline-none focus:border-gold-500 transition-colors"
+            />
+            <button disabled={addingCategory || !newCategoryName.trim()} type="submit" className="px-4 py-2.5 bg-obsidian-800 hover:bg-obsidian-700 text-white rounded-lg transition-colors flex items-center justify-center shrink-0 border border-gray-700">
+              <FolderPlus className="w-5 h-5" />
+            </button>
+          </form>
+        </div>
       
       {loading ? (
         <p className="text-gray-500">Yuklanmoqda...</p>
@@ -167,19 +167,19 @@ export default function MenuManagement() {
                     <p className="p-4 text-sm text-gray-500 italic">Bu kategoriyada hali taom yo'q.</p>
                   )}
                   {categoryProducts.map(product => (
-                    <div key={product.id} className="p-4 flex items-center justify-between hover:bg-obsidian-800/50 transition-colors">
-                      <div className="flex items-center gap-4">
+                    <div key={product.id} className="p-3 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-obsidian-800/50 transition-colors">
+                      <div className="flex items-center gap-3 md:gap-4">
                         <img 
                           src={product.image_url} 
                           alt={product.name} 
-                          className={`w-16 h-16 object-cover rounded-lg border border-gray-700 transition-opacity ${!product.is_available && 'opacity-50 grayscale'}`} 
+                          className={`w-14 h-14 md:w-16 md:h-16 object-cover rounded-xl border border-gray-700 shrink-0 transition-opacity ${!product.is_available && 'opacity-50 grayscale'}`} 
                         />
-                        <div>
-                          <p className={`font-medium text-lg ${!product.is_available && 'text-gray-500 line-through'}`}>
+                        <div className="min-w-0">
+                          <p className={`font-semibold text-base md:text-lg truncate ${!product.is_available ? 'text-gray-500 line-through' : 'text-white'}`}>
                             {product.name}
                           </p>
-                          <div className="flex flex-wrap gap-2 items-center mt-1">
-                            <p className="text-sm font-bold text-gold-400">{Number(product.price).toLocaleString()} so'm</p>
+                          <div className="flex flex-wrap gap-1.5 items-center mt-1">
+                            <p className="text-xs md:text-sm font-bold text-gold-400">{Number(product.price).toLocaleString()} so'm</p>
                             {product.variants && product.variants.length > 0 && (
                               <span className="text-[10px] bg-gold-500/10 text-gold-500 px-1.5 py-0.5 rounded border border-gold-500/20">
                                 +{product.variants.length} porsiya
@@ -187,7 +187,7 @@ export default function MenuManagement() {
                             )}
                             {product.addons && product.addons.length > 0 && (
                               <span className="text-[10px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
-                                +{product.addons.length} qo'shimcha
+                                +{product.addons.length} sous
                               </span>
                             )}
                             {product.ready_time && (
@@ -196,27 +196,27 @@ export default function MenuManagement() {
                               </span>
                             )}
                             {product.promo_text && (
-                                <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20">
-                                  🎁 {product.promo_text}
-                                </span>
-                              )}
-                              {product.stock !== null && product.stock !== undefined && (
-                                <span className="text-[10px] bg-orange-500/10 text-orange-400 px-1.5 py-0.5 rounded border border-orange-500/20">
-                                  📦 Qoldiq: {product.stock} ta
-                                </span>
-                              )}
+                              <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20">
+                                🎁 {product.promo_text}
+                              </span>
+                            )}
+                            {product.stock !== null && product.stock !== undefined && (
+                              <span className="text-[10px] bg-orange-500/10 text-orange-400 px-1.5 py-0.5 rounded border border-orange-500/20">
+                                📦 {product.stock} ta
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4">
-                        <button onClick={() => openEditModal(product)} className="p-2 text-gray-400 hover:text-gold-500 bg-obsidian-950 rounded-lg border border-gray-800 hover:border-gold-500/30 transition-colors">
+                      <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0 border-t sm:border-0 border-gray-800 pt-2 sm:pt-0">
+                        <button onClick={() => openEditModal(product)} className="p-2 text-gray-400 hover:text-gold-500 bg-obsidian-950 rounded-lg border border-gray-800 hover:border-gold-500/30 transition-colors" title="Tahrirlash">
                           <Edit2 className="w-4 h-4" />
                         </button>
 
                         <button 
                           onClick={() => toggleAvailability(product.id, product.is_available)}
-                          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors w-28 text-center border ${
+                          className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium text-xs md:text-sm transition-colors min-w-[80px] md:w-28 text-center border ${
                             product.is_available 
                               ? 'bg-green-500/10 text-green-500 border-green-500/30 hover:bg-green-500/20' 
                               : 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20'

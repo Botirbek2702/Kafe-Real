@@ -57,14 +57,14 @@ export default function Marketing() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 w-full">
-      <div className="flex gap-8">
+    <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-12 w-full">
+      <div className="flex flex-col lg:flex-row gap-6 md:gap-8">
       {/* Send Form */}
-      <div className="w-1/2">
-        <h2 className="text-3xl font-cinzel text-gold-500 mb-8">Marketing va Xabarnomalar</h2>
+      <div className="w-full lg:w-1/2">
+        <h2 className="text-2xl md:text-3xl font-cinzel text-gold-500 mb-6 md:mb-8 font-semibold">Marketing va Xabarnomalar</h2>
         
-        <div className="bg-obsidian-900 border border-gray-800 rounded-xl p-6">
-          <form onSubmit={handleSend} className="space-y-6">
+        <div className="bg-obsidian-900 border border-gray-800 rounded-xl p-4 md:p-6">
+          <form onSubmit={handleSend} className="space-y-4 md:space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-gold-500" />
@@ -72,13 +72,13 @@ export default function Marketing() {
               </label>
               <textarea
                 required
-                rows={5}
+                rows={4}
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
-                className="w-full bg-obsidian-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors resize-none"
+                className="w-full bg-obsidian-950 border border-gray-800 rounded-lg px-3.5 py-2.5 md:px-4 md:py-3 text-sm text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors resize-none"
                 placeholder="Aksiya va chegirmalar haqida xabar yozing..."
               />
-              <p className="text-xs text-gray-500 mt-2">Ushbu xabar botdan ro'yxatdan o'tgan barcha mijozlarga yuboriladi.</p>
+              <p className="text-[11px] md:text-xs text-gray-500 mt-1.5">Ushbu xabar botdan ro'yxatdan o'tgan barcha mijozlarga yuboriladi.</p>
             </div>
 
             <div>
@@ -90,26 +90,26 @@ export default function Marketing() {
                 type="url"
                 value={form.imageUrl}
                 onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                className="w-full bg-obsidian-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors"
+                className="w-full bg-obsidian-950 border border-gray-800 rounded-lg px-3.5 py-2.5 md:px-4 md:py-3 text-sm text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors"
                 placeholder="https://..."
               />
             </div>
 
             {form.imageUrl && (
-              <div className="mt-4 rounded-lg overflow-hidden border border-gray-800">
-                <img src={form.imageUrl} alt="Preview" className="w-full h-48 object-cover" onError={(e) => e.target.style.display='none'} />
+              <div className="mt-3 rounded-lg overflow-hidden border border-gray-800">
+                <img src={form.imageUrl} alt="Preview" className="w-full h-40 md:h-48 object-cover" onError={(e) => e.target.style.display='none'} />
               </div>
             )}
 
             <button
               type="submit"
               disabled={sending}
-              className="w-full bg-gold-500 hover:bg-gold-400 text-obsidian-950 font-bold py-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-gold-500 hover:bg-gold-400 text-obsidian-950 font-bold py-3 md:py-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
             >
               {sending ? (
                 <>Yuborilmoqda...</>
               ) : (
-                <><Send className="w-5 h-5" /> Barchaga yuborish</>
+                <><Send className="w-4 h-4 md:w-5 md:h-5" /> Barchaga yuborish</>
               )}
             </button>
           </form>
@@ -117,8 +117,8 @@ export default function Marketing() {
       </div>
 
       {/* History */}
-      <div className="w-1/2">
-        <h3 className="text-xl font-cinzel text-gray-300 mb-8 mt-2">Yuborilganlar tarixi</h3>
+      <div className="w-full lg:w-1/2">
+        <h3 className="text-lg md:text-xl font-cinzel text-gray-300 mb-4 md:mb-8 mt-2 font-semibold">Yuborilganlar tarixi</h3>
         
         <div className="space-y-4">
           {loading ? (

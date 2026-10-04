@@ -48,15 +48,15 @@ export default function Customers() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 w-full">
+    <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-12 w-full">
       <div>
-        <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-cinzel text-gold-500">Mijozlar Bazasi</h2>
-        <div className="bg-obsidian-900 border border-gray-800 rounded-lg px-4 py-2 flex items-center gap-2">
-          <Users className="w-5 h-5 text-gold-500" />
-          <span className="text-white font-medium">Jami: {customers.length}</span>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl font-cinzel text-gold-500 font-semibold">Mijozlar Bazasi</h2>
+          <div className="bg-obsidian-900 border border-gray-800 rounded-lg px-3.5 py-1.5 flex items-center gap-2">
+            <Users className="w-4 h-4 md:w-5 md:h-5 text-gold-500" />
+            <span className="text-white text-xs md:text-sm font-medium">Jami: {customers.length}</span>
+          </div>
         </div>
-      </div>
 
       <div className="bg-obsidian-900 border border-gray-800 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">

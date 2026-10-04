@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import { playBeep } from '../lib/sound'
-import { Printer, CheckCircle, XCircle } from 'lucide-react'
+import { Printer, CheckCircle, XCircle, ArrowLeft } from 'lucide-react'
 
 export default function Orders() {
   const [orders, setOrders] = useState([])
@@ -112,37 +112,45 @@ export default function Orders() {
   }
 
   return (
-    <div className="flex-1 flex gap-6 p-8 overflow-hidden">
+    <div className="flex-1 flex gap-4 md:gap-6 p-3 md:p-8 overflow-hidden h-full relative">
       {/* Orders List */}
-      <div className="w-1/3 flex flex-col bg-obsidian-900 border border-gray-800 rounded-xl overflow-hidden no-print">
-        <div className="p-4 border-b border-gray-800 bg-obsidian-950">
-          <h2 className="text-xl font-cinzel text-gold-500">Buyurtmalar</h2>
+      <div className={`w-full md:w-1/3 flex flex-col bg-obsidian-900 border border-gray-800 rounded-xl overflow-hidden no-print ${
+        selectedOrder ? 'hidden md:flex' : 'flex'
+      }`}>
+        <div className="p-3.5 md:p-4 border-b border-gray-800 bg-obsidian-950 flex items-center justify-between">
+          <h2 className="text-lg md:text-xl font-cinzel text-gold-500 font-semibold">Buyurtmalar</h2>
+          <span className="text-xs text-gray-400 font-medium bg-obsidian-900 border border-gray-800 px-2 py-0.5 rounded-full">
+            {orders.length} ta
+          </span>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-2.5 md:p-4 space-y-2.5 md:space-y-3">
           {loading && orders.length === 0 ? (
-            <p className="text-center text-gray-500">Yuklanmoqda...</p>
+            <p className="text-center text-gray-500 py-6 text-sm">Yuklanmoqda...</p>
+          ) : orders.length === 0 ? (
+            <p className="text-center text-gray-500 py-6 text-sm">Hozircha buyurtma yo'q</p>
           ) : orders.map(order => (
             <div 
               key={order.id}
               onClick={() => setSelectedOrder(order)}
-              className={`p-4 rounded-lg cursor-pointer transition-colors border ${
+              className={`p-3 md:p-4 rounded-xl cursor-pointer transition-all border ${
                 selectedOrder?.id === order.id 
-                  ? 'bg-gold-500/10 border-gold-500/50' 
-                  : 'bg-obsidian-950 border-gray-800 hover:border-gray-600'
+                  ? 'bg-gold-500/10 border-gold-500/50 shadow-md shadow-gold-500/5' 
+                  : 'bg-obsidian-950 border-gray-800 hover:border-gray-700'
               }`}
             >
-              <div className="flex justify-between items-start mb-2">
-                <span className="font-bold text-lg">#{order.id}</span>
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(order.status)}`}>
+              <div className="flex justify-between items-start mb-1.5">
+                <span className="font-bold text-base md:text-lg text-white">#{order.id}</span>
+                <span className={`text-[11px] md:text-xs px-2 py-0.5 rounded-full font-medium ${getStatusColor(order.status)}`}>
                   {translateStatus(order.status)}
                 </span>
               </div>
-              <div className="text-sm text-gray-400">
+              <div className="text-xs md:text-sm text-gray-400">
                 {format(new Date(order.created_at), 'HH:mm')} • {order.order_type === 'delivery' ? 'Yetkazib berish' : 'Olib ketish'}
               </div>
-              <div className="mt-2 font-medium text-gold-400">
-                {Number(order.total_price).toLocaleString()} so'm
+              <div className="mt-2 font-medium text-gold-400 text-sm md:text-base flex items-center justify-between">
+                <span>{Number(order.total_price).toLocaleString()} so'm</span>
+                <span className="text-xs text-gray-500">{order.customer_name || 'Mijoz'}</span>
               </div>
             </div>
           ))}
@@ -150,52 +158,62 @@ export default function Orders() {
       </div>
 
       {/* Order Details & Receipt Print Area */}
-      <div className="flex-1 bg-obsidian-900 border border-gray-800 rounded-xl overflow-hidden flex flex-col">
+      <div className={`flex-1 bg-obsidian-900 border border-gray-800 rounded-xl overflow-hidden flex flex-col ${
+        !selectedOrder ? 'hidden md:flex' : 'flex'
+      }`}>
         {selectedOrder ? (
           <>
-            <div className="p-6 border-b border-gray-800 flex justify-between items-center no-print">
-              <h2 className="text-2xl font-cinzel text-gold-500">Buyurtma #{selectedOrder.id}</h2>
+            <div className="p-4 md:p-6 border-b border-gray-800 flex justify-between items-center no-print bg-obsidian-950">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="md:hidden p-2 bg-obsidian-900 hover:bg-obsidian-800 text-gray-300 rounded-lg border border-gray-800"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <h2 className="text-xl md:text-2xl font-cinzel text-gold-500 font-bold">Buyurtma #{selectedOrder.id}</h2>
+              </div>
               <div className="flex gap-2">
-                <button onClick={handlePrint} className="p-2 bg-obsidian-800 hover:bg-obsidian-700 rounded-lg text-white transition-colors">
+                <button onClick={handlePrint} className="p-2 bg-obsidian-800 hover:bg-obsidian-700 rounded-lg text-white transition-colors border border-gray-700" title="Chop etish">
                   <Printer className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
             {/* Scrollable details */}
-            <div className="flex-1 overflow-y-auto p-6 no-print">
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="bg-obsidian-950 p-4 rounded-lg border border-gray-800">
-                  <p className="text-gray-400 text-sm mb-1">Mijoz ma'lumotlari</p>
-                  <p className="font-medium text-lg">{selectedOrder.customer_name || 'Noma\'lum'}</p>
-                  <p className="text-gray-300">{selectedOrder.phone || selectedOrder.customer_phone}</p>
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 no-print space-y-4 md:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
+                <div className="bg-obsidian-950 p-3.5 md:p-4 rounded-xl border border-gray-800">
+                  <p className="text-gray-400 text-xs md:text-sm mb-1">Mijoz ma'lumotlari</p>
+                  <p className="font-semibold text-base md:text-lg text-white">{selectedOrder.customer_name || 'Noma\'lum'}</p>
+                  <p className="text-gray-300 text-sm mt-0.5">{selectedOrder.phone || selectedOrder.customer_phone}</p>
                 </div>
-                <div className="bg-obsidian-950 p-4 rounded-lg border border-gray-800">
-                  <p className="text-gray-400 text-sm mb-1">Buyurtma turi</p>
-                  <p className="font-medium text-lg">{selectedOrder.order_type === 'delivery' ? 'Yetkazib berish' : 'Olib ketish'}</p>
+                <div className="bg-obsidian-950 p-3.5 md:p-4 rounded-xl border border-gray-800">
+                  <p className="text-gray-400 text-xs md:text-sm mb-1">Buyurtma turi</p>
+                  <p className="font-semibold text-base md:text-lg text-white">{selectedOrder.order_type === 'delivery' ? 'Yetkazib berish' : 'Olib ketish'}</p>
                   {selectedOrder.address && (
-                    <p className="text-gray-300 text-sm mt-1">{selectedOrder.address}</p>
+                    <p className="text-gray-300 text-xs md:text-sm mt-1 break-words">{selectedOrder.address}</p>
                   )}
                 </div>
               </div>
 
-              <div className="bg-obsidian-950 rounded-lg border border-gray-800 overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-obsidian-800 text-gray-400 text-sm">
+              <div className="bg-obsidian-950 rounded-xl border border-gray-800 overflow-x-auto">
+                <table className="w-full text-left min-w-[320px]">
+                  <thead className="bg-obsidian-800 text-gray-400 text-xs md:text-sm">
                     <tr>
-                      <th className="p-4 font-medium">Mahsulot</th>
-                      <th className="p-4 font-medium text-center">Soni</th>
-                      <th className="p-4 font-medium text-right">Narx</th>
-                      <th className="p-4 font-medium text-right">Jami</th>
+                      <th className="p-3 md:p-4 font-medium">Mahsulot</th>
+                      <th className="p-3 md:p-4 font-medium text-center">Soni</th>
+                      <th className="p-3 md:p-4 font-medium text-right">Narx</th>
+                      <th className="p-3 md:p-4 font-medium text-right">Jami</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-800">
+                  <tbody className="divide-y divide-gray-800 text-xs md:text-sm">
                     {selectedOrder.order_items.map((item, idx) => (
                       <tr key={idx}>
-                        <td className="p-4">{item.name || item.products?.name}</td>
-                        <td className="p-4 text-center">{item.quantity}</td>
-                        <td className="p-4 text-right">{Number(item.price || item.unit_price).toLocaleString()}</td>
-                        <td className="p-4 text-right font-medium">{Number(item.price * item.quantity).toLocaleString()}</td>
+                        <td className="p-3 md:p-4 text-stone-200">{item.name || item.products?.name}</td>
+                        <td className="p-3 md:p-4 text-center font-medium">{item.quantity}</td>
+                        <td className="p-3 md:p-4 text-right text-stone-400">{Number(item.price || item.unit_price).toLocaleString()}</td>
+                        <td className="p-3 md:p-4 text-right font-semibold text-white">{Number(item.price * item.quantity).toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -203,45 +221,45 @@ export default function Orders() {
               </div>
               
               {selectedOrder.comment && (
-                <div className="mt-6 bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg">
-                  <p className="text-yellow-500 text-sm font-medium mb-1">Izoh:</p>
-                  <p className="text-yellow-100">{selectedOrder.comment}</p>
+                <div className="bg-yellow-500/10 border border-yellow-500/20 p-3.5 md:p-4 rounded-xl">
+                  <p className="text-yellow-500 text-xs md:text-sm font-medium mb-1">Izoh:</p>
+                  <p className="text-yellow-100 text-xs md:text-sm">{selectedOrder.comment}</p>
                 </div>
               )}
             </div>
 
             {/* Actions Footer */}
-            <div className="p-6 border-t border-gray-800 bg-obsidian-950 flex justify-between items-center no-print">
-              <div className="flex gap-3">
+            <div className="p-3.5 md:p-6 border-t border-gray-800 bg-obsidian-950 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 no-print">
+              <div className="flex flex-wrap gap-2">
                 {selectedOrder.status === 'new' && (
-                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'accepted')} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5" /> Qabul qilish
+                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'accepted')} className="flex-1 sm:flex-none justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors flex items-center gap-1.5 text-xs md:text-sm">
+                    <CheckCircle className="w-4 h-4" /> Qabul qilish
                   </button>
                 )}
                 {selectedOrder.status === 'accepted' && (
-                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'cooking')} className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5" /> Pishirish
+                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'cooking')} className="flex-1 sm:flex-none justify-center px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-lg transition-colors flex items-center gap-1.5 text-xs md:text-sm">
+                    <CheckCircle className="w-4 h-4" /> Pishirish
                   </button>
                 )}
                 {selectedOrder.status === 'cooking' && (
-                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'ready')} className="px-6 py-2 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5" /> Tayyor
+                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'ready')} className="flex-1 sm:flex-none justify-center px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg transition-colors flex items-center gap-1.5 text-xs md:text-sm">
+                    <CheckCircle className="w-4 h-4" /> Tayyor
                   </button>
                 )}
                 {selectedOrder.status === 'ready' && selectedOrder.order_type === 'delivery' && (
-                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'delivered')} className="px-6 py-2 bg-green-700 hover:bg-green-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5" /> Yetkazildi
+                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'delivered')} className="flex-1 sm:flex-none justify-center px-4 py-2.5 bg-green-700 hover:bg-green-600 text-white font-medium rounded-lg transition-colors flex items-center gap-1.5 text-xs md:text-sm">
+                    <CheckCircle className="w-4 h-4" /> Yetkazildi
                   </button>
                 )}
                 {['new', 'accepted'].includes(selectedOrder.status) && (
-                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')} className="px-6 py-2 bg-obsidian-800 hover:bg-red-500/20 text-red-500 font-medium rounded-lg transition-colors flex items-center gap-2">
-                    <XCircle className="w-5 h-5" /> Bekor qilish
+                  <button onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')} className="flex-1 sm:flex-none justify-center px-4 py-2.5 bg-obsidian-800 hover:bg-red-500/20 text-red-500 font-medium rounded-lg transition-colors flex items-center gap-1.5 text-xs md:text-sm border border-red-500/20">
+                    <XCircle className="w-4 h-4" /> Bekor qilish
                   </button>
                 )}
               </div>
-              <div className="text-right">
-                <p className="text-gray-400 text-sm">Umumiy summa</p>
-                <p className="text-3xl font-bold text-gold-500">{Number(selectedOrder.total_price).toLocaleString()} so'm</p>
+              <div className="text-left sm:text-right flex sm:flex-col justify-between items-center sm:items-end border-t sm:border-0 border-gray-800 pt-2 sm:pt-0">
+                <span className="text-gray-400 text-xs">Jami summa:</span>
+                <span className="text-lg md:text-2xl font-bold text-gold-500">{Number(selectedOrder.total_price).toLocaleString()} so'm</span>
               </div>
             </div>
 
