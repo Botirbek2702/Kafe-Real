@@ -75,7 +75,8 @@ export default function CartPage({ onBack, onSuccess }) {
       hapticSuccess()
       onSuccess(orderId)
     } catch (err) {
-      setError(err.message?.includes('qolgan') || err.message?.includes('tugagan') ? err.message : 'Buyurtma yuborilmadi. Qayta urinib ko\'ring.')
+      const isStockError = err.message?.includes('qolgan') || err.message?.includes('tugagan')
+      setError(isStockError ? err.message.replace(/:\s*\d+/, '') : 'Buyurtma yuborilmadi. Qayta urinib ko\'ring.')
     } finally {
       setSending(false)
     }

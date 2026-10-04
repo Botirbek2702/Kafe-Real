@@ -27,7 +27,7 @@ export default function SuccessPage({ orderId, onBack }) {
 
       <div className="relative mt-8 flex w-full max-w-xs flex-col gap-3">
         <button className="bg-gold-gradient h-12 rounded-full font-cinzel text-xs font-bold tracking-[0.15em] text-obsidian-950 uppercase" onClick={onBack}>
-          Menyuga qaytish
+          Buyurtmalarim
         </button>
         {tg?.initData && (
           <button className="h-12 rounded-full border border-gold-500/40 font-cinzel text-xs tracking-[0.15em] text-gold-300 uppercase" onClick={() => tg.close()}>
