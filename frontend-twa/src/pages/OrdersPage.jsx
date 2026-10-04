@@ -25,26 +25,38 @@ export default function OrdersPage({ onBack }) {
   useEffect(() => {
     fetchOrders()
 
+    // 1. Supabase Realtime obunasi
     const channel = supabase
-      .channel('my-orders-realtime')
+      .channel('my-orders-realtime-' + (tgUser?.id || Math.random()))
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders' },
         (payload) => {
-          // Agar ushbu foydalanuvchining buyurtmasi yangilansa yoki qo'shilsa
-          const orderTelegramId = payload.new?.telegram_id || payload.old?.telegram_id
-          if (!orderTelegramId || orderTelegramId === (tgUser?.id || 0)) {
-            fetchOrders()
-            if (payload.eventType === 'UPDATE') {
-              hapticSuccess()
-            }
+          if (payload.eventType === 'UPDATE' && payload.new) {
+            // Darhol ekrandagi status va cancel_reason'ni yangilaymiz (bir zumda!)
+            setOrders((prev) =>
+              prev.map((ord) =>
+                ord.id === payload.new.id
+                  ? { ...ord, status: payload.new.status, cancel_reason: payload.new.cancel_reason }
+                  : ord
+              )
+            )
+            hapticSuccess()
           }
+          // To'liq yangilash
+          fetchOrders()
         }
       )
       .subscribe()
 
+    // 2. Agar telefon tarmog'ida WebSockets to'xtab qolsa ham har 4 soniyada avtomatik tekshirib turadi
+    const interval = setInterval(() => {
+      fetchOrders()
+    }, 4000)
+
     return () => {
       supabase.removeChannel(channel)
+      clearInterval(interval)
     }
   }, [])
 
