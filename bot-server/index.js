@@ -2,7 +2,9 @@ require('dotenv').config()
 const { Telegraf, Markup, session } = require('telegraf')
 const { createClient } = require('@supabase/supabase-js')
 
-const { BOT_TOKEN, WEBAPP_URL, SUPABASE_URL, SUPABASE_ANON_KEY } = process.env
+const http = require('http')
+
+const { BOT_TOKEN, WEBAPP_URL, SUPABASE_URL, SUPABASE_ANON_KEY, PORT = 3000 } = process.env
 if (!BOT_TOKEN || !WEBAPP_URL || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('.env faylida BOT_TOKEN, WEBAPP_URL, SUPABASE_URL, SUPABASE_ANON_KEY bo\'lishi shart')
   process.exit(1)
@@ -10,6 +12,15 @@ if (!BOT_TOKEN || !WEBAPP_URL || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 const bot = new Telegraf(BOT_TOKEN)
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// Render.com Web Service port detection
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' })
+  res.end('Bot is running!')
+})
+server.listen(PORT, () => {
+  console.log(`🌐 Web server portda tinglamoqda: ${PORT}`)
+})
 
 // Simple in-memory session (for production use redis or telegraf-session-local)
 bot.use(session())
