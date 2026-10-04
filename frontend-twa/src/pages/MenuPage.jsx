@@ -9,9 +9,15 @@ export default function MenuPage({ onOpenCart, onOpenOrders }) {
   const { data, isLoading, isError, refetch } = useMenu()
   const items = useCart((s) => s.items)
   const [observedActive, setActive] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const tabsRef = useRef(null)
 
-  const categories = (data?.categories ?? []).filter((c) => data.products.some((p) => p.category_id === c.id))
+  const searchWords = searchQuery.toLowerCase().split(' ').filter(Boolean)
+  const filteredProducts = data ? data.products.filter(p => 
+    searchWords.length === 0 || searchWords.every(w => p.name.toLowerCase().includes(w))
+  ) : []
+
+  const categories = (data?.categories ?? []).filter((c) => filteredProducts.some((p) => p.category_id === c.id))
   const active = observedActive ?? categories[0]?.id ?? null
   const lines = data ? cartLines(items, data.products) : []
   const count = cartCount(lines)
@@ -82,6 +88,22 @@ export default function MenuPage({ onOpenCart, onOpenOrders }) {
             <PinIcon /> Yangiariq, Xorazm
           </span>
         </div>
+
+        {/* Qidiruv */}
+        <div className="mt-5 mx-4 max-w-sm w-full mx-auto relative">
+          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <svg className="h-4 w-4 text-gold-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            className="w-full bg-obsidian-900 border border-gold-600/20 text-sm text-stone-200 rounded-full py-2.5 pl-10 pr-4 placeholder-stone-500 focus:outline-none focus:border-gold-500/50 transition-colors"
+            placeholder="Taom qidirish..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </header>
 
       {/* Kategoriyalar */}
@@ -109,7 +131,7 @@ export default function MenuPage({ onOpenCart, onOpenOrders }) {
             <div className="h-px flex-1 bg-gradient-to-r from-gold-600/40 to-transparent" />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {data.products.filter((p) => p.category_id === c.id).map((p) => (
+            {filteredProducts.filter((p) => p.category_id === c.id).map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
@@ -118,7 +140,7 @@ export default function MenuPage({ onOpenCart, onOpenOrders }) {
 
       {/* Savatcha tugmasi */}
       <div
-        className={`fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-obsidian-950 via-obsidian-950/95 to-transparent px-4 pt-6 pb-[max(14px,env(safe-area-inset-bottom))] transition-transform duration-300 ${
+        className={`fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-obsidian-950 via-obsidian-950/95 to-transparent px-4 pt-6 pb-[max(24px,env(safe-area-inset-bottom))] transition-transform duration-300 ${
           count > 0 ? 'translate-y-0' : 'translate-y-full'
         }`}
       >

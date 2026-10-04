@@ -93,7 +93,8 @@ export default function OrdersPage({ onBack }) {
                             clear(); // clear current cart
                             // Add all items back
                             order.order_items.forEach(item => {
-                              for(let i = 0; i < item.quantity; i++) add(item.product_id)
+                              const addonsObj = Array.isArray(item.addons) ? item.addons.map(a => ({ name: a })) : []
+                              for(let i = 0; i < item.quantity; i++) add(item.product_id, item.variant, addonsObj)
                             });
                             alert("Taomlar savatchaga qo'shildi!");
                             onBack(); // Go back to menu so they can see cart

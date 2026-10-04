@@ -237,7 +237,7 @@ export default function CartPage({ onBack, onSuccess }) {
         {error && <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-obsidian-950 via-obsidian-950/95 to-transparent px-4 pt-6 pb-[max(14px,env(safe-area-inset-bottom))]">
+      <div className="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-obsidian-950 via-obsidian-950/95 to-transparent px-4 pt-6 pb-[max(24px,env(safe-area-inset-bottom))]">
         <button
           type="submit"
           disabled={sending}
