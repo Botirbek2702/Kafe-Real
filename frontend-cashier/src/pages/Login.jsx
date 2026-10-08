@@ -8,22 +8,45 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const [lockoutSeconds, setLockoutSeconds] = useState(0)
   const navigate = useNavigate()
 
   const handleLogin = async (e) => {
     e.preventDefault()
+    if (lockoutSeconds > 0) return
+
     setLoading(true)
     setError(null)
     
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     })
 
     if (error) {
-      setError(error.message)
+      const newAttempts = failedAttempts + 1
+      setFailedAttempts(newAttempts)
+
+      if (newAttempts >= 5) {
+        setError("Juda ko'p xato urinishlar. Xavfsizlik uchun 30 soniyaga qulflandi.")
+        setLockoutSeconds(30)
+        const timer = setInterval(() => {
+          setLockoutSeconds((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer)
+              setFailedAttempts(0)
+              return 0
+            }
+            return prev - 1
+          })
+        }, 1000)
+      } else {
+        setError(`Kirishda xatolik: Email yoki parol noto'g'ri (${5 - newAttempts} ta urinish qoldi)`)
+      }
       setLoading(false)
     } else {
+      setFailedAttempts(0)
       navigate('/')
     }
   }
@@ -72,10 +95,14 @@ export default function Login() {
           </div>
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-gold-500 hover:bg-gold-400 text-obsidian-950 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
+            disabled={loading || lockoutSeconds > 0}
+            className={`w-full font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center ${
+              lockoutSeconds > 0
+                ? 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700'
+                : 'bg-gold-500 hover:bg-gold-400 text-obsidian-950'
+            }`}
           >
-            {loading ? 'Kirilmoqda...' : 'Kirish'}
+            {loading ? 'Kirilmoqda...' : lockoutSeconds > 0 ? `Kuting: ${lockoutSeconds}s` : 'Kirish'}
           </button>
         </form>
       </div>

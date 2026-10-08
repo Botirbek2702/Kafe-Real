@@ -251,12 +251,21 @@ async function sendBroadcastMessage(broadcast) {
           })
           successCount++
         } catch (imgErr) {
-          // Rasm ochilmasa yoki xato bersa, matnning o'zini yetkazamiz!
-          await bot.telegram.sendMessage(chatId, broadcast.message, { parse_mode: 'HTML' })
+          // Agar HTML xato bersa yoki rasm ochilmasa, oddiy matn sifatida qayta jo'natamiz
+          try {
+            await bot.telegram.sendMessage(chatId, broadcast.message, { parse_mode: 'HTML' })
+          } catch (htmlErr) {
+            await bot.telegram.sendMessage(chatId, broadcast.message) // hechnarsasiz xavfsiz oddiy matn
+          }
           successCount++
         }
       } else {
-        await bot.telegram.sendMessage(chatId, broadcast.message, { parse_mode: 'HTML' })
+        try {
+          await bot.telegram.sendMessage(chatId, broadcast.message, { parse_mode: 'HTML' })
+        } catch (htmlErr) {
+          // HTML parse xatoligi bo'lsa (masalan < yoki > belgilari), oddiy matn sifatida xatosiz yetkazamiz
+          await bot.telegram.sendMessage(chatId, broadcast.message)
+        }
         successCount++
       }
 
