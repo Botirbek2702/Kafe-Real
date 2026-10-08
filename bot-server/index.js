@@ -173,37 +173,6 @@ process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
 
 // ==========================================
-// PENDING XABARLARNI YUBORISH (STARTUP)
-// ==========================================
-async function processPendingBroadcasts() {
-  const { data: pending } = await supabase.from('broadcast_messages').select('*').eq('status', 'pending')
-  if (!pending) return
-  
-  for (const broadcast of pending) {
-    const { data: customers } = await supabase.from('customers').select('telegram_id')
-    if (!customers) continue
-
-    let successCount = 0;
-    for (const customer of customers) {
-      try {
-        if (broadcast.image_url) {
-          await bot.telegram.sendPhoto(customer.telegram_id, broadcast.image_url, { caption: broadcast.message })
-        } else {
-          await bot.telegram.sendMessage(customer.telegram_id, broadcast.message)
-        }
-        successCount++;
-        await new Promise(r => setTimeout(r, 50)); 
-      } catch (e) {
-        console.error(`Foydalanuvchiga yuborib bo'lmadi: ${customer.telegram_id}`, e.message)
-      }
-    }
-    await supabase.from('broadcast_messages').update({ status: 'completed' }).eq('id', broadcast.id)
-    console.log(`Pending brodcast tugadi. ${successCount} kishiga yuborildi.`)
-  }
-}
-processPendingBroadcasts();
-
-// ==========================================
 // BUYURTMA HOLATI (STATUS) UCHUN REALTIME
 // ==========================================
 function getStatusMessage(order) {
@@ -242,8 +211,82 @@ supabase
   .subscribe()
 
 // ==========================================
-// MARKETING (XABAR TARQATISH) UCHUN REALTIME
+// PROFESSIONAL MARKETING XABAR TARQATISH
 // ==========================================
+let isBroadcasting = false
+
+async function sendBroadcastMessage(broadcast) {
+  if (!broadcast || !broadcast.id) return
+
+  // Statusni darhol "processing" ga o'tkazamiz
+  await supabase
+    .from('broadcast_messages')
+    .update({ status: 'processing' })
+    .eq('id', broadcast.id)
+
+  const { data: customers, error } = await supabase
+    .from('customers')
+    .select('telegram_id')
+
+  if (error || !customers || customers.length === 0) {
+    console.log('Xabar yuborish uchun mijozlar topilmadi.')
+    await supabase.from('broadcast_messages').update({ status: 'completed' }).eq('id', broadcast.id)
+    return
+  }
+
+  console.log(`📢 Xabar tarqatish boshlandi (ID: ${broadcast.id}). Jami mijozlar: ${customers.length}`)
+  let successCount = 0
+  let failCount = 0
+
+  for (const customer of customers) {
+    const chatId = customer.telegram_id
+    if (!chatId) continue
+
+    try {
+      if (broadcast.image_url) {
+        try {
+          await bot.telegram.sendPhoto(chatId, broadcast.image_url, { 
+            caption: broadcast.message,
+            parse_mode: 'HTML'
+          })
+          successCount++
+        } catch (imgErr) {
+          // Rasm ochilmasa yoki xato bersa, matnning o'zini yetkazamiz!
+          await bot.telegram.sendMessage(chatId, broadcast.message, { parse_mode: 'HTML' })
+          successCount++
+        }
+      } else {
+        await bot.telegram.sendMessage(chatId, broadcast.message, { parse_mode: 'HTML' })
+        successCount++
+      }
+
+      // Telegram API cheklovlaridan o'tish uchun xavfsiz oraliq (35ms = ~28 msg/sec)
+      await new Promise(r => setTimeout(r, 40))
+    } catch (err) {
+      failCount++
+      // Agar foydalanuvchi botni bloklagan bo'lsa (403 Forbidden)
+      if (err.response?.error_code === 403) {
+        console.log(`Mijoz botni bloklagan: ${chatId}`)
+      } else if (err.response?.error_code === 429) {
+        // Agar Telegram "kut" desa (Too Many Requests), ko'rsatilgan soniya kutamiz
+        const retryAfter = (err.response.parameters?.retry_after || 2) * 1000
+        console.log(`Telegram Flood Wait: ${retryAfter}ms kutilmoqda...`)
+        await new Promise(r => setTimeout(r, retryAfter))
+      } else {
+        console.error(`Xabar yetkazilmadi (${chatId}):`, err.message)
+      }
+    }
+  }
+
+  await supabase
+    .from('broadcast_messages')
+    .update({ status: 'completed' })
+    .eq('id', broadcast.id)
+
+  console.log(`✅ Xabar tarqatish yakunlandi. Yetkazildi: ${successCount}, Yetib bormadi: ${failCount}`)
+}
+
+// Baza orqali yangi broadcast tushganda eshitish
 supabase
   .channel('bot-marketing')
   .on(
@@ -251,32 +294,33 @@ supabase
     { event: 'INSERT', schema: 'public', table: 'broadcast_messages' },
     async (payload) => {
       const broadcast = payload.new
-      
-      // Bazadan barcha mijozlarni olamiz
-      const { data: customers } = await supabase.from('customers').select('telegram_id')
-      if (!customers) return
-
-      let successCount = 0;
-      
-      // Xabarni barchaga yuborish
-      for (const customer of customers) {
-        try {
-          if (broadcast.image_url) {
-            await bot.telegram.sendPhoto(customer.telegram_id, broadcast.image_url, { caption: broadcast.message })
-          } else {
-            await bot.telegram.sendMessage(customer.telegram_id, broadcast.message)
-          }
-          successCount++;
-          // Telegram API limitlariga tushib qolmaslik uchun kichik tanaffus
-          await new Promise(r => setTimeout(r, 50)); 
-        } catch (e) {
-          console.error(`Foydalanuvchiga yuborib bo'lmadi: ${customer.telegram_id}`, e.message)
-        }
+      if (isBroadcasting) return
+      isBroadcasting = true
+      try {
+        await sendBroadcastMessage(broadcast)
+      } finally {
+        isBroadcasting = false
       }
-
-      // Statusni yakunlangan qilib qo'yish
-      await supabase.from('broadcast_messages').update({ status: 'completed' }).eq('id', broadcast.id)
-      console.log(`Brodcast tugadi. ${successCount} kishiga yuborildi.`)
     }
   )
   .subscribe()
+
+// Server qayta yoqilganda qolib ketgan "pending" xabarlarni yuborish
+async function checkPendingBroadcasts() {
+  const { data: pending } = await supabase
+    .from('broadcast_messages')
+    .select('*')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true })
+    .limit(1)
+
+  if (pending && pending.length > 0 && !isBroadcasting) {
+    isBroadcasting = true
+    try {
+      await sendBroadcastMessage(pending[0])
+    } finally {
+      isBroadcasting = false
+    }
+  }
+}
+setTimeout(checkPendingBroadcasts, 3000)
