@@ -4,19 +4,82 @@ const { createClient } = require('@supabase/supabase-js')
 
 const http = require('http')
 
-const { BOT_TOKEN, WEBAPP_URL, SUPABASE_URL, SUPABASE_ANON_KEY, PORT = 3000 } = process.env
-if (!BOT_TOKEN || !WEBAPP_URL || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error('.env faylida BOT_TOKEN, WEBAPP_URL, SUPABASE_URL, SUPABASE_ANON_KEY bo\'lishi shart')
+const { BOT_TOKEN, WEBAPP_URL, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, PORT = 3000 } = process.env
+if (!BOT_TOKEN || !WEBAPP_URL || !SUPABASE_URL || (!SUPABASE_ANON_KEY && !SUPABASE_SERVICE_ROLE_KEY)) {
+  console.error('.env faylida kerakli kalitlar bo\'lishi shart')
   process.exit(1)
 }
 
 const bot = new Telegraf(BOT_TOKEN)
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+// Server uchun xavfsiz Admin kalit (Service Role), agar kiritilmagan bo'lsa anon kalit
+const supabaseKey = SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY
+const supabase = createClient(SUPABASE_URL, supabaseKey, {
+  auth: { persistSession: false }
+})
 
-// Render.com Web Service port detection
+const crypto = require('crypto')
+
+// Telegram WebApp initData hash tekshirish (Telegram rasmiy algoritmi)
+function verifyTelegramInitData(initDataRaw, botToken) {
+  try {
+    const urlParams = new URLSearchParams(initDataRaw)
+    const hash = urlParams.get('hash')
+    if (!hash) return null
+
+    urlParams.delete('hash')
+    const params = Array.from(urlParams.entries())
+    params.sort(([a], [b]) => a.localeCompare(b))
+
+    const dataCheckString = params.map(([k, v]) => `${k}=${v}`).join('\n')
+    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest()
+    const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex')
+
+    if (calculatedHash !== hash) return null
+
+    const userRaw = urlParams.get('user')
+    return userRaw ? JSON.parse(userRaw) : null
+  } catch (err) {
+    console.error('InitData verify error:', err)
+    return null
+  }
+}
+
+// Render.com Web Service port va API
 const server = http.createServer((req, res) => {
+  // CORS ruxsatlari
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204)
+    return res.end()
+  }
+
+  // Telegram WebApp tekshirish endpointi
+  if (req.method === 'POST' && req.url === '/api/validate-user') {
+    let body = ''
+    req.on('data', chunk => { body += chunk })
+    req.on('end', () => {
+      try {
+        const { initData } = JSON.parse(body || '{}')
+        const verifiedUser = verifyTelegramInitData(initData, BOT_TOKEN)
+        if (!verifiedUser) {
+          res.writeHead(401, { 'Content-Type': 'application/json' })
+          return res.end(JSON.stringify({ ok: false, error: 'Xavfsizlik tekshiruvidan o\'tmadi (Invalid initData)' }))
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        return res.end(JSON.stringify({ ok: true, user: verifiedUser }))
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' })
+        return res.end(JSON.stringify({ ok: false, error: 'Bad request' }))
+      }
+    })
+    return
+  }
+
   res.writeHead(200, { 'Content-Type': 'text/plain' })
-  res.end('Bot is running!')
+  res.end('Kafe Bot Server is running!')
 })
 server.listen(PORT, () => {
   console.log(`🌐 Web server portda tinglamoqda: ${PORT}`)
